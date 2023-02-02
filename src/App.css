@@ -1,0 +1,60 @@
+.App {
+  background-color:rgb(68 68 68 / 29%); 
+  height: 100%;
+
+}
+
+.input-form_wrap {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  position: absolute;
+  margin-left: 35%;
+  margin-top: 300px;
+  background-color: beige;
+  box-shadow: 0px 0px 20px 0px rgb(129, 121, 121);
+  border: 3px solid rgb(19, 124, 189);
+  border-radius: 10px;
+  user-select: none;
+} 
+
+.input-form_title {
+  min-height: 30px;
+  font-weight: bold;
+  background-color: rgb(19, 124, 189);
+  color: blue;
+  color: aliceblue;
+  width: 100%;
+  text-align: left;
+  padding-left: 5%;
+  padding-top: 1%;
+  min-height: 30px;
+}
+.form {
+  padding-top: 3%;
+}
+.form_wrap {
+  justify-content: center;
+  align-items: center;
+}
+
+.bp4-form-group {
+  width: 400px;
+  padding-left: 5%;
+  padding-right: 5%;
+} 
+
+.bp4-button-group {
+  width: 100%;
+  justify-content: flex-end;
+  padding-right: 5%;
+  padding-bottom: 5%;
+}
+
+@media (max-width: 1100px) {
+  .input-form_wrap {
+    margin-left: 1%;
+    margin-top: 150px;
+  }
+}
