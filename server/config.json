@@ -1,0 +1,14 @@
+{
+    "port": "5000",
+    "ltr": {
+        "login": "infologic50030427",
+        "password": "fnohxr5K"
+    },
+    "pg": {
+        "host": "s48-svn",
+        "database":"3logic",
+        "user":"sa",
+        "password":"sa",
+        "port": 5432
+    }
+}
