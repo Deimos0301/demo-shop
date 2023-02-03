@@ -46,8 +46,8 @@ class App extends Component {
         //e.preventDefault();
         this.getAuth(login, password)
             .then((res) => {
-                if (res === true) {
-                    localStorage.setItem('token', 'ура!');
+                if (res.token) {
+                    localStorage.setItem('token', res.token);
                     this.setState({ authenticated: true });
                 } else {
                     this.setState({ authenticated: false });

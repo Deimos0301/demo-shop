@@ -12,7 +12,9 @@ class Main extends Component {
         this.state = {
             category_id: 0,
             brand_id: 0,
-            data: []
+
+            treeData: [],
+            gridData: []
         };
     }
 
@@ -23,29 +25,39 @@ class Main extends Component {
                 'Content-Type': 'application/json',
             }
         });
-        const li = await arr.json();
-        // console.log(li)
-        return li;
+        return await arr.json();
+    }
+
+    getProducts = async (category_id, brand_id) => {
+        const arr = await fetch('/api/getProducts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ category_id: category_id, brand_id: brand_id })
+        });
+
+        return await arr.json();
     }
 
     componentDidMount = async () => {
-        this.setState({ data: await this.getCategories() });
+        this.setState({ treeData: await this.getCategories() });
     }
 
-    onFocusedRowChanged = (e) => {
+    onFocusedRowChanged = async (e) => {
         const rowData = e.row && e.row.data;
 
-        console.log(rowData)
-        this.setState({ category_id: rowData.category_id, brand_id: rowData.brand_id });
+        //console.log(rowData)
+        const data = await this.getProducts(rowData.category_id, rowData.brand_id);
+
+        this.setState({ gridData: data });
     }
 
     render() {
-
-
         return (
             <>
                 <TreeList
-                    dataSource={this.state.data}
+                    dataSource={this.state.treeData}
                     showBorders={false}
                     columnAutoWidth={true}
                     wordWrapEnabled={true}
@@ -72,9 +84,9 @@ class Main extends Component {
                         allowSorting={false}
                     />
                 </TreeList>
+                
                 <Products
-                    category_id={this.state.category_id}
-                    brand_id={this.state.brand_id}
+                    dataSource={this.state.gridData}
                 />
             </>
 

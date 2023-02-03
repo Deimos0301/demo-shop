@@ -18,3 +18,14 @@
     font-weight: 500;
     font-family: "PT Sans Narrow", sans-serif;
 }
+
+.dx-datagrid-headers {
+    background: gray;
+    font-family: "PT Sans Narrow", sans-serif;
+    color: white;
+}
+
+.prod_grid {
+    margin-left: 5px;
+    height: 100vh;
+}

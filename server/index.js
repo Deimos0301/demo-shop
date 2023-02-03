@@ -3,6 +3,9 @@ const express = require('express');
 const path = require('path');
 const { pool } = require('./sqldb');
 const soap = require('soap');
+const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+const fs = require('fs');
 
 const app = express();
 
@@ -11,13 +14,42 @@ app.use(express.json());
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../build')));
 
-//An api endpoint that returns a short list of items
-// app.post('/api/getList', (req, res) => {
-//     var list = [{scenariopage_name:"Вася"}, {scenariopage_name:"Петя"}, {scenariopage_name:"Вова"}];
-//     res.json(list);
-//     //res.end(JSON.stringify(list));
-//     console.log(list);
-// });
+app.get('/api/getUser', (req, res) => {
+    console.log(req.query.login);
+    if (req.query.login) return res.status(200).json(req.query.login)
+    else
+        return res
+            .status(401)
+            .json({ message: 'Not authorized' })
+});
+
+const urlencodedParser = express.urlencoded({ extended: true });
+
+const tokenKey = '1a2b-3c4d-5e6f-7g8h';
+
+app.post('/api/getAuth', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select * from users where Upper(login) = Upper($1) and password = md5($2)', [req.body.login, req.body.password]);
+    if (rows.rows && rows.rows.length > 0) {
+            let head = Buffer.from(
+                JSON.stringify({ alg: 'HS256', typ: 'jwt' })
+            ).toString('base64');
+
+            let body = Buffer.from(JSON.stringify(rows.rows[0].login)).toString('base64');
+
+            let signature = crypto
+                .createHmac('SHA256', tokenKey)
+                .update(`${head}.${body}`)
+                .digest('base64');
+
+            return res.status(200).json({
+                user_id: rows.rows[0].user_id,
+                login: rows.rows[0].login,
+                token: `${head}.${body}.${signature}`,
+            });
+    }
+
+    return res.status(404).json({ message: 'Invalid username or password!' });
+})
 
 // Handles any requests that don't match the ones above
 app.get('*', (req, res) => {
@@ -33,23 +65,42 @@ app.all('/*', function (req, res, next) {
 
 app.listen(config.port);
 
-const urlencodedParser = express.urlencoded({ extended: true });
-
 app.post('/api/getCategories', urlencodedParser, async (req, res) => {
     const rows = await pool.query('select * from "getCategories"()');
     //await pool.query('select * from users');
-    console.log(req.body);
+    //console.log('getCategories:', req.headers.host);
     res.json(rows.rows);
 });
 
-app.post('/api/getAuth', urlencodedParser, async (req, res) => {
-    const rows = await pool.query('select * from users where Upper(login) = Upper($1) and password = md5($2)', [req.body.login, req.body.password]);
-    console.log(rows.rows);
-    if (rows.rows && rows.rows.length > 0)
-        res.end("true");
-    else
-        res.end('false');
+app.post('/api/getProducts', urlencodedParser, async (req, res) => {
+    console.log(req.body);
+    const rows = await pool.query('select * from "getProducts"($1, $2)', [req.body.category_id, req.body.brand_id]);
+    res.json(rows.rows);
+    //res.end('done');
 });
+
+// app.post('/api/getAuth', urlencodedParser, async (req, res) => {
+//     const rows = await pool.query('select * from users where Upper(login) = Upper($1) and password = md5($2)', [req.body.login, req.body.password]);
+//     //console.log(rows.rows);
+
+//     if (rows.rows && rows.rows.length > 0)
+//         res.end(JSON.stringify({ token: uuidv4(), result: true }));
+//     else {
+//         res.status(401).json({ message: 'Invalid username or password!' });
+//     }
+// });
+
+app.post('/api/load3Logic', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select ltr_Category_ID from public.Category where ltr_Category_ID is not NULL');
+    let arr = [];
+    rows.rows.map((item) => { arr.push(item.ltr_category_id) });
+
+    if (arr.length > 0)
+        await load3Logic(arr);
+
+    res.end("done");
+});
+
 
 //const urlLogic = 'http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx?WSDL';
 //const urlLogic = 'http://www.thomas-bayer.com/axis2/services/BLZService?wsdl';
@@ -102,6 +153,28 @@ getCategories = (client, categoryArr) => {
                             orderno: item.category_id.$value
                         });
                 });
+                resolve(arr);
+            }
+        });
+    });
+}
+
+getProductDescription = (client, category_id) => {
+    return new Promise((resolve, reject) => {
+        client.getProductDescriptionA_category({ category_id: category_id }, (err, result) => {
+            let arr = [];
+
+            if (err) reject(err);
+            else {
+                if (result.return.item && Array.isArray(result.return.item)) {
+                    result.return.item.map((item) => {
+                        arr.push({
+                            attribute_id: item.id.$value,
+                            product_id: item.mat_id.$value,
+                            value: item.val.$value ? item.val.$value : null
+                        });
+                    });
+                }
                 resolve(arr);
             }
         });
@@ -236,7 +309,7 @@ function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-loadWSDL = async (enabledCategories) => {
+load3Logic = async (enabledCategories) => {
     const client = await soap.createClientAsync(urlLogic);
     client.setSecurity(new soap.BasicAuthSecurity(config.ltr.login, config.ltr.password));
     await getToday(client);
@@ -285,6 +358,19 @@ loadWSDL = async (enabledCategories) => {
             await timeout(1);
         }
 
+        console.log('Loading attribute values...');
+        for (let i = 0; i < categoryArr.length; i++) {
+            let cat = categoryArr[i];
+            //console.log(cat.category_id, cat.category_name);
+            const arr = await getProductDescription(client, cat.category_id);
+
+            if (arr && Array.isArray(arr) && arr.length > 0) {
+                //                await fs.writeFile('E:\\Downloads\\php\\a.json', JSON.stringify(arr, null, 4), (err) => {console.log(err)});
+                await pool.query('call ltr.category_atrib_value_insert($1)', [JSON.stringify(arr)]);
+            }
+            await timeout(1);
+        }
+
         const curr = await getCurrencyRate(client);
         await pool.query(`
           insert into ltr.currency_rate (date, value) 
@@ -303,6 +389,6 @@ loadWSDL = async (enabledCategories) => {
     //console.log(categoryArr.length);
 }
 
-//loadWSDL([71, 56, 113, 237, 69]);
+//load3Logic([71, 56, 113, 237, 69]);
 
 console.log(`App is listening on port ${config.port}`);
