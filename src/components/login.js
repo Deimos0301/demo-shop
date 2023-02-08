@@ -1,6 +1,6 @@
 import { React, Component } from 'react';
 import { Button, Icon, ButtonGroup, InputGroup, FormGroup } from "@blueprintjs/core";
-import Main from './main';
+import Main from './catalog';
 import PasswordInput from '../passwordInput';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '../App.css';

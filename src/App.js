@@ -1,8 +1,9 @@
 import logo from './logo.svg';
 import Login from './components/login';
-import Main from './components/main';
+import Catalog from './components/catalog';
 import { React, Component } from 'react';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Header from './header';
 import './App.css';
 
 //set DANGEROUSLY_DISABLE_HOST_CHECK=true && 
@@ -15,7 +16,8 @@ class App extends Component {
         this.state = {
             login: '',
             password: '',
-            authenticated: false
+            authenticated: false,
+            focusedRowKey: 0
         }
     }
 
@@ -55,12 +57,18 @@ class App extends Component {
             });
     };
 
+    itemClick = (e) => {
+        this.setState({focusedRowKey: e.itemData.id});
+        //console.log(e.itemData.id)
+    }
+
     render() {
         return (
             <BrowserRouter>
                 <div className="App">
+                    <Header itemClick={this.itemClick}/>
                     <Routes>
-                        <Route exact path='/' element={this.state.authenticated ? <Main /> : <Login onSubmitClick={this.onSubmitClick} />} />
+                        <Route exact path='/' element={this.state.authenticated ? <Catalog focusedRowKey={this.state.focusedRowKey}/> : <Login onSubmitClick={this.onSubmitClick} />} />
                         <Route exact path='/auth' element={<Login onSubmitClick={this.onSubmitClick} />}></Route>
                     </Routes>
                 </div>

@@ -1,0 +1,21 @@
+.header {
+    display: flex;
+    justify-content: left;
+    background-color: white;
+}
+
+.logo {
+    margin-left: 70px;
+}
+
+@media (max-width: 1200px) {
+    .sidebar {
+        display: block;
+    }
+}
+
+@media (min-width: 1199px) {
+    .sidebar {
+        display: none;
+    }
+}

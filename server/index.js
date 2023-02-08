@@ -30,22 +30,22 @@ const tokenKey = '1a2b-3c4d-5e6f-7g8h';
 app.post('/api/getAuth', urlencodedParser, async (req, res) => {
     const rows = await pool.query('select * from users where Upper(login) = Upper($1) and password = md5($2)', [req.body.login, req.body.password]);
     if (rows.rows && rows.rows.length > 0) {
-            let head = Buffer.from(
-                JSON.stringify({ alg: 'HS256', typ: 'jwt' })
-            ).toString('base64');
+        let head = Buffer.from(
+            JSON.stringify({ alg: 'HS256', typ: 'jwt' })
+        ).toString('base64');
 
-            let body = Buffer.from(JSON.stringify(rows.rows[0].login)).toString('base64');
+        let body = Buffer.from(JSON.stringify(rows.rows[0].login)).toString('base64');
 
-            let signature = crypto
-                .createHmac('SHA256', tokenKey)
-                .update(`${head}.${body}`)
-                .digest('base64');
+        let signature = crypto
+            .createHmac('SHA256', tokenKey)
+            .update(`${head}.${body}`)
+            .digest('base64');
 
-            return res.status(200).json({
-                user_id: rows.rows[0].user_id,
-                login: rows.rows[0].login,
-                token: `${head}.${body}.${signature}`,
-            });
+        return res.status(200).json({
+            user_id: rows.rows[0].user_id,
+            login: rows.rows[0].login,
+            token: `${head}.${body}.${signature}`,
+        });
     }
 
     return res.status(404).json({ message: 'Invalid username or password!' });
@@ -72,10 +72,71 @@ app.post('/api/getCategories', urlencodedParser, async (req, res) => {
     res.json(rows.rows);
 });
 
+// var rawData = [
+//     { id: 1, name: "Комплектующие для компьютеров", parent_id: 0 },
+//     { id: 2,name: "Видеокарты", parent_id: 1},
+//     { id: 555, name: "ASUS", parent_id: 2}
+//   ];
+
+
+pack = (data) => {
+    const childs = id =>
+        data.filter(item => item.parent_id === id)
+            .map(
+                ({ id, name, category_id, brand_id, iscat }) => ({ id, name, category_id, brand_id, iscat, items: childs(id) })
+            ).map(
+                ({ id, name, category_id, brand_id, iscat, items }) => items.length ? { id, name, category_id, brand_id, iscat, items } : { id, name, category_id, brand_id, iscat }
+            );
+    return childs(0);
+}
+
+//   console.log(JSON.stringify(pack(rawData, 1, 4)));
+
+app.post('/api/getCategories2', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select id, name, Coalesce(parent_id,0) as parent_id, category_id, brand_id, iscat from "getCategories"()');
+
+    const pa = pack(rows.rows);
+    //console.log(pa[0].items[0]);
+
+    res.json(pa);
+});
+
 app.post('/api/getProducts', urlencodedParser, async (req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
     const rows = await pool.query('select * from "getProducts"($1, $2)', [req.body.category_id, req.body.brand_id]);
     res.json(rows.rows);
+    //res.end('done');
+});
+
+app.post('/api/getProductDesc2', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select * from "getProductDesc"($1)', [req.body.product_id]);
+    //console.log(rows.rows);
+    res.json(rows.rows);
+});
+
+app.post('/api/getProductDesc', urlencodedParser, async (req, res) => {
+    //console.log(req.body);
+    const rows = await pool.query('select * from "getProductDesc"($1)', [req.body.product_id]);
+    let group = ''; //rows.rows[0].group_name;
+
+    let arr = [];
+
+    rows.rows.map((row) => {
+        if (row.group_name !== group) {
+            obj = new Object();
+
+            obj.group_name = row.group_name;
+            obj.attribs = [];
+            arr.push(obj);
+
+            group = row.group_name;
+        }
+
+        //console.log(row.group_name,  row.attr_name);
+        obj.attribs.push({ attr_name: row.attr_name, value: row.value });
+    });
+    //console.log(arr);
+    res.json(arr);
     //res.end('done');
 });
 
@@ -150,7 +211,8 @@ getCategories = (client, categoryArr) => {
                             category_id: item.category_id.$value,
                             category_name: item.category_name.$value ? item.category_name.$value : '<Не определено>',
                             parent_id: item.parent_id ? item.parent_id.$value : null,
-                            orderno: item.category_id.$value
+                            orderno: item.category_id.$value,
+                            iscat: item.iscat.$value
                         });
                 });
                 resolve(arr);

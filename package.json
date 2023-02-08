@@ -2,7 +2,7 @@
   "name": "demo-shop",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://192.168.10.3:5000/",
+  "proxy": "http://78.107.239.68:5000/",
   "dependencies": {
     "@blueprintjs/core": "^4.15.1",
     "@testing-library/jest-dom": "^5.16.5",
@@ -10,14 +10,16 @@
     "@testing-library/user-event": "^13.5.0",
     "devextreme-react": "^22.2.4",
     "react": "^18.2.0",
+    "react-burger-menu": "^3.0.9",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0",
+    "react-router-hash-link": "^2.4.3",
     "react-scripts": "5.0.1",
     "tree-list": "^1.0.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set DANGEROUSLY_DISABLE_HOST_CHECK=true && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

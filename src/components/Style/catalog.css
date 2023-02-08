@@ -1,0 +1,100 @@
+.treelist {
+    height: 100vh;
+    width: 400px;
+}
+
+.dx-treelist-headers {
+    font-size: 20px;
+    background: #f07b1d;
+    color: white;
+}
+.dx-treelist {
+    height: 100vh;
+    max-width: 350px;
+}
+
+.dx-treelist-content {
+    font-size: 17px;
+    font-weight: 500;
+    font-family: "PT Sans Narrow", sans-serif;
+}
+
+.dx-datagrid-headers {
+    background: rgba(169, 169, 169, 0.37);
+    font-family: "PT Sans Narrow", sans-serif;
+    color: black;
+}
+
+.prod_price {
+    font-weight: 700;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 15px;
+}
+
+.dx-field-item-label-location-left {
+    font-weight: 600;
+}
+
+.prod_grid {
+    margin-left: 5px;
+    height: 100vh;
+    /* max-width: 800px; */
+}
+
+.full_name {
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.prod_photo {
+    display: flex;
+    max-width: 400px;
+    min-height: 400px;
+    min-width: 400px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    justify-content: flex-start;
+    /* width: 100%; */
+}
+
+.catalog {
+    display: flex;
+    flex-direction: row;
+}
+
+.currentNode {
+    font-weight: 600;
+    font-size: 24px;
+    padding-left: 10px;
+    text-align: left;
+}
+
+.desc_row {
+    display: flex;
+    flex-direction: row;
+}
+
+.desc_head {
+    font-size: 16px;
+    width: 210px;
+}
+
+.desc_value {
+    font-size: 16px;
+    width: 290px;
+}
+
+@media (max-width: 1200px) {
+    .category_list {
+        display: none;
+    }
+
+    .currentNode {
+        font-size: 16px;
+    }
+
+    .wrap_photo {
+        justify-content: center;
+    }
+}
