@@ -166,7 +166,7 @@ app.post('/api/getProductDesc', urlencodedParser, async (req, res) => {
 app.post('/api/basketInsert', urlencodedParser, async (req, res) => {
     const host = req.ip.split(':')[3];
 
-    console.log(host, req.body)
+    //console.log(host, req.body)
     await pool.query('call public."BasketInsert"($1, $2, $3)', [host, req.body.product_id, req.body.total]);
 
     res.end("done");

@@ -31,7 +31,7 @@ class Products extends Component {
         const url = e.row.data.image_prefix + e.row.data.product_image_short;
         const href = `/product/${e.row.data.product_id}`;
         //console.log(e.row.data)
-        return <a href={href}>  <img src={url}></img> </a>;
+        return <a href={href}>  <img src={url} alt=""></img> </a>;
     }
 
     priceRender = (e) => {
