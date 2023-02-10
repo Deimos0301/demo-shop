@@ -1,0 +1,363 @@
+import { React, Component } from 'react';
+import TabPanel, { Item } from 'devextreme-react/tab-panel';
+import { Popup, ToolbarItem } from 'devextreme-react/popup';
+import { Toast } from 'devextreme-react/toast';
+import { Button } from 'devextreme-react/button';
+import { Link } from 'react-router-dom';
+import TextBox from 'devextreme-react/text-box';
+
+import './Style/profile.css';
+
+class Profile extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            authenticated: false,
+            popupVisible: false,
+            errorVisible: false,
+            user_id: localStorage.getItem('user_id'),
+            userInfo: {}
+        }
+    }
+
+    componentDidMount = async () => {
+        //localStorage.removeItem('token');
+        const token = localStorage.getItem('token');
+
+        if (token) {
+            const info = await this.getUserInfo();
+            this.setState({ authenticated: true, userInfo: info });
+            //console.log(info)
+        }
+        else
+            this.showLoginForm();
+
+    }
+
+    showLoginForm = () => {
+        this.setState({
+            formVisible: true
+        });
+    }
+
+    hideLoginForm = () => {
+        this.setState({
+            formVisible: false
+        });
+    }
+
+    getAuth = async () => {
+        console.log(this.state.userInfo)
+        const {login, password} = this.state.userInfo;
+
+        const res = await fetch('/api/getAuth', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_id: null, login: login, password: password })
+        });
+        const li = await res.json();
+        const info = await this.getUserInfo();
+        this.setState({ authenticated: true, userInfo: info });
+        return li;
+    }
+
+    getUserInfo = async () => {
+        const res = await fetch('/api/getUserInfo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_id: this.state.user_id })
+        });
+        const li = await res.json();
+
+        return li[0];
+    }
+
+    usersUpdate = async () => {
+        const res = await fetch('/api/usersUpdate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify( {data: [this.state.userInfo]} )
+        });
+        // const li = await res.json();
+
+        // return li[0];
+    }
+
+    onLoginClick = (e) => {
+        //e.preventDefault();
+        this.getAuth()
+            .then((res) => {
+                if (res.token) {
+                    localStorage.setItem('token', res.token);
+                    localStorage.setItem('user_id', res.user_id);
+                    this.setState({ authenticated: true, errorVisible: false, formVisible: false });
+                } else {
+                    this.setState({ authenticated: false, errorVisible: true });
+                }
+            });
+    };
+
+    onHiding = () => {
+        this.setState({ errorVisible: false });
+    }
+
+    // this.setState(prevState => {
+    //     let jasper = Object.assign({}, prevState.jasper);  // creating copy of state variable jasper
+    //     jasper.name = 'someothername';                     // update the name property, assign a new value
+    //     return { jasper };                                 // return new object jasper object
+    //   })
+      
+    onLoginChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.login = data.value;
+            return {userInfo};
+        });
+    }
+
+    onFirstNameChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.first_name = data.value;
+            return {userInfo};
+        });
+    }
+
+    onLastNameChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.last_name = data.value;
+            return {userInfo};
+        });
+    }
+
+    onMiddleNameChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.middle_name = data.value;
+            return {userInfo};
+        });
+    }
+
+    onEmailChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.email = data.value;
+            return {userInfo};
+        });
+    }
+
+    onPhoneChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.phone = data.value;
+            return {userInfo};
+        });
+    }
+
+    onCityChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.city = data.value;
+            return {userInfo};
+        });
+    }
+
+    onAddressChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.address = data.value;
+            return {userInfo};
+        });
+    }
+
+    onPasswordChanged = (data) => {
+        this.setState( prevState => {
+            let userInfo = {...prevState.userInfo};
+            userInfo.password = data.value;
+            return {userInfo};
+        });
+    }
+
+    onSaveProfile = async (e) => {
+        await this.usersUpdate();
+    }
+
+    onExit = (e) => {
+        localStorage.removeItem('token');
+        this.setState({authenticated: false});
+        this.showLoginForm();
+    }
+
+    titleRenderer = (data) => {
+        return <div style={{fontSize: "18px", fontWeight: "500"}}>Авторизация</div>;
+    }
+
+    render() {
+        return (
+            <>
+                <Toast
+                    visible={this.state.errorVisible}
+                    message="Пользователь или пароль указаны неверно!"
+                    type="error"
+                    onHiding={this.onHiding}
+                    displayTime={800}
+                />
+
+                <Popup
+                    visible={this.state.formVisible}
+                    onHiding={this.hideLoginForm}
+                    dragEnabled={true}
+                    hideOnOutsideClick={false}
+                    showCloseButton={false}
+                    showTitle={true}
+                    title="Авторизация"
+                    container=".App"
+                    titleRender={this.titleRenderer}
+                    width={380}
+                    height={250}
+                >
+                    <ToolbarItem
+                        widget="dxButton"
+                        toolbar="bottom"
+                        location="after"
+                        options={{ text: "Вход", icon: "check", onClick: this.onLoginClick }}
+                    />
+                    {/* <ToolbarItem
+                        widget="dxButton"
+                        toolbar="bottom"
+                        location="before"
+                        options={{ text: 'Отмена', icon: "clear", onClick: this.hideLoginForm }}>
+                        <Link to="/signup"></Link>
+                    </ToolbarItem> */}
+
+                    <div className="dx-field">
+                        <div className="dx-field-label">Пользователь:</div>
+                        <div className="dx-field-value">
+                            <TextBox
+                                placeholder="Телефон или email"
+                                value={this.state.userInfo.login}
+                                onValueChanged={this.onLoginChanged}
+                            >
+                            </TextBox>
+                        </div>
+                    </div>
+
+                    <div className="dx-field">
+                        <div className="dx-field-label">Пароль:</div>
+                        <div className="dx-field-value">
+                            <TextBox
+                                placeholder="Пароль"
+                                mode="password"
+                                value={this.state.userInfo.password}
+                                onValueChanged={this.onPasswordChanged}
+                            >
+                            </TextBox>
+                        </div>
+                    </div>
+
+                    {/* <div className="dx-field" style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+                <div>Забыли пароль?</div>
+            </div> */}
+
+                    <div className="dx-field" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <div> <Link to="/signup" onClick={() => { this.hideLoginForm() }}> Регистрация  </Link> </div>
+                    </div>
+                </Popup>
+
+                <div style={{
+                    display: "flex", 
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingLeft: "10px",
+                    width: "100%", 
+                    height: "40px", 
+                    textAlign: "center", 
+                    backgroundColor: "#959aad", 
+                    color: "white", 
+                    fontSize: "20px", 
+                    fontWeight: "600", 
+                    marginBottom: "10px" }}
+                >
+                    Личный кабинет
+                    <Button text="Выход" type="danger" icon="arrowright" stylingMode="contained" onClick={this.onExit}></Button>
+                </div>
+
+                <div>
+                    {this.state.authenticated ?
+                        <TabPanel
+                            height="100vh"
+                            selectedIndex={0}
+                            // onOptionChanged={this.onSelectionChanged}
+                            loop={false}
+                            animationEnabled={true}
+                            swipeEnabled={true}
+                        >
+                            <Item title="Личные данные">
+                                <div className='profile_row'>
+                                <div className='profile_item'>
+                                        <div className='profile_label'>Логин:</div>
+                                        <TextBox text={this.state.userInfo.login} className="profile_input" onValueChanged={this.onLoginChanged} />
+                                    </div>
+                                    
+                                    <div className='profile_item'>
+                                        <div className='profile_label'>Фамилия:</div>
+                                        <TextBox text={this.state.userInfo.last_name} className="profile_input" onValueChanged={this.onLastNameChanged}/>
+                                    </div>
+                                    
+                                    <div className='profile_item'>
+                                        <div className='profile_label'>Имя:</div>
+                                        <TextBox text={this.state.userInfo.first_name} className="profile_input" onValueChanged={this.onFirstNameChanged}/>
+                                    </div>
+                                    
+                                    <div className='profile_item'>
+                                        <div className='profile_label'>Отчество:</div>
+                                        <TextBox value={this.state.userInfo.middle_name} className="profile_input" onValueChanged={this.onMiddleNameChanged} />
+                                    </div>
+                                    
+                                    <div className='profile_item'>
+                                        <div className='profile_label'>Email:</div>
+                                        <TextBox text={this.state.userInfo.email} mode="email" className="profile_input" onValueChanged={this.onEmailChanged}/>
+                                    </div>
+
+                                    <div className='profile_item'>
+                                        <div className='profile_label'>Телефон:</div>
+                                        <TextBox text={this.state.userInfo.phone} className="profile_input" mode="tel" onValueChanged={this.onPhoneChanged}/>
+                                    </div>
+                                    
+                                    <div className='profile_item'>
+                                        <div className='profile_label'>Город:</div>
+                                        <TextBox text={this.state.userInfo.city} className="profile_input" onValueChanged={this.onCityChanged}/>
+                                    </div>
+                                    
+                                    <div className='profile_item'>
+                                        <div className='profile_label'>Адрес:</div>
+                                        <TextBox text={this.state.userInfo.address} className="profile_input" onValueChanged={this.onAddressChanged}/>
+                                    </div>
+                                    
+                                    <div className='profile_item' style={{marginTop: "20px", marginLeft: "10px"}}>
+                                        <Button text="Сохранить" type="success" icon="save" stylingMode="containded" onClick={this.onSaveProfile}/>
+                                    </div>
+                                </div>
+                            </Item>
+
+                            <Item title="Мои заказы"></Item>
+                        </TabPanel>
+                        :
+                        <div>Не авторизовано</div>}
+
+                </div>
+            </>
+        )
+    }
+}
+
+export default Profile;

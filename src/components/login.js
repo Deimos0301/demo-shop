@@ -35,6 +35,7 @@ class Login extends Component {
                     <form className='form' onSubmit={this.onSubmitClick}>
                         <FormGroup label="Пользователь" labelFor="user-name">
                             <InputGroup
+                                className='login_input'
                                 id="user-name"
                                 leftIcon="user"
                                 autoComplete="off"
@@ -44,6 +45,7 @@ class Login extends Component {
                         </FormGroup>
                         <FormGroup label="Пароль" labelFor="user-password">
                             <PasswordInput
+                                className='login_input'
                                 id="user-password"
                                 leftIcon="lock"
                                 autoComplete="off"

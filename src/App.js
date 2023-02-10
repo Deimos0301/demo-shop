@@ -1,10 +1,12 @@
-import logo from './logo.svg';
 import Login from './components/login';
 import Catalog from './components/catalog';
+import Signup from './components/signup';
+import Profile from './components/profile';
 import { React, Component } from 'react';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from './header';
 import './App.css';
+import Cart from './components/cart';
 
 //set DANGEROUSLY_DISABLE_HOST_CHECK=true && 
 
@@ -22,9 +24,9 @@ class App extends Component {
     }
 
     componentDidMount = () => {
-        const token = localStorage.getItem('token');
+        // const token = localStorage.getItem('token');
 
-        if (token)
+        // if (token)
             this.setState({ authenticated: true });
     }
 
@@ -70,6 +72,9 @@ class App extends Component {
                     <Routes>
                         <Route exact path='/' element={this.state.authenticated ? <Catalog focusedRowKey={this.state.focusedRowKey}/> : <Login onSubmitClick={this.onSubmitClick} />} />
                         <Route exact path='/auth' element={<Login onSubmitClick={this.onSubmitClick} />}></Route>
+                        <Route exact path='/signup' element={<Signup />}></Route>
+                        <Route exact path='/profile' element={<Profile />}></Route>
+                        <Route exact path='/basket' element={<Cart onSubmitClick={this.onSubmitClick}/>}></Route>
                     </Routes>
                 </div>
             </BrowserRouter>

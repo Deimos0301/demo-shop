@@ -1,9 +1,10 @@
 import { slide as Burger } from "react-burger-menu";
 import { React, Component } from "react";
+import { Link } from 'react-router-dom';
 import Menu from 'devextreme-react/menu';
 import './sidebar.css';
 
- 
+
 class SideBar extends Component {
     constructor(props) {
         super(props);
@@ -30,13 +31,13 @@ class SideBar extends Component {
 
         return await arr.json();
     }
-    
+
     closeMenu = () => {
-        this.setState({isOpen: false});
+        this.setState({ isOpen: false });
     }
 
     handleIsOpen = () => {
-        this.setState({isOpen: !this.state.isOpen});
+        this.setState({ isOpen: !this.state.isOpen });
     }
 
     itemClick = (e) => {
@@ -47,16 +48,19 @@ class SideBar extends Component {
     render() {
         return (
             <Burger right={false} width={this.props.width} isOpen={this.state.isOpen} onOpen={this.handleIsOpen} onClose={this.handleIsOpen}>
-                <div style={{color: "maroon", fontSize: "20px", fontWeight: "600"}}>Каталог:</div>
-                <Menu 
-                    dataSource={this.state.treeSource}
-                    displayExpr="name"
-                    showFirstSubmenuMode="onHover"
-                    orientation="horizontal"
-                    hideSubmenuOnMouseLeave={true}
-                    onItemClick={this.itemClick}
-                >    
-                </Menu>
+                <div style={{color: 'maroon', fontSize: "20px", fontWeight: "600", lineHeight: "40px", textDecoration: "none"}}>
+                    <div> <Link to="/profile">Личный кабинет</Link></div>
+                    <div >Каталог:</div>
+                    <Menu
+                        dataSource={this.state.treeSource}
+                        displayExpr="name"
+                        showFirstSubmenuMode="onHover"
+                        orientation="horizontal"
+                        hideSubmenuOnMouseLeave={true}
+                        onItemClick={this.itemClick}
+                    >
+                    </Menu>
+                </div>
             </Burger>
         );
     }

@@ -36,6 +36,16 @@ class ProductDesc extends Component {
         return r;
     }
 
+    basketInsert = async () => {
+        const arr = await fetch('/api/basketInsert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ product_id: this.props.data.data.product_id, total: 1 })
+        });
+    }
+
     renderGroup = (data) => {
         return <p style={{ color: "maroon", fontSize: '18px' }}>{data.displayValue}</p>;
     }
@@ -89,7 +99,7 @@ class ProductDesc extends Component {
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
                 <div className="price" style={{ fontSize: "20px", fontWeight: 500 }}>Цена: {formatter.format(prod.product_price_retail_rub.toFixed(0))}</div>
-                <Button style={{marginBottom: "5px"}} className="bp4-intent-success" large={false} rightIcon="circle-arrow-right">В корзину</Button>
+                <Button style={{ marginBottom: "5px" }} className="bp4-intent-success" large={false} rightIcon="add" onClick={this.basketInsert}>В корзину</Button>
             </div>
 
             <div className="wrap_photo" style={{ display: "flex" }}>

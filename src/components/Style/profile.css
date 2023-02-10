@@ -1,0 +1,41 @@
+.profile_input {
+    width: 250px;
+    margin: 10px 0 0 20px;
+}
+
+.profile_item {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    width: 350px;
+}
+
+.profile_row {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile_label {
+    margin-left: 10px;
+    width: 100px;
+    font-weight: 400;
+}
+
+.dx-popup-title {
+    text-overflow: unset;
+    color: aliceblue;
+    background-color: rgb(19, 124, 189);
+}
+
+.dx-toolbar-label > div  {
+    overflow: visible; 
+    text-overflow: unset;
+} 
+
+.dx-field {
+    font-size: 16px;
+}
+
+.dx-textbox {
+    font-size: 16px;
+}

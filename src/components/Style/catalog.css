@@ -22,7 +22,8 @@
 .dx-datagrid-headers {
     background: rgba(169, 169, 169, 0.37);
     font-family: "PT Sans Narrow", sans-serif;
-    color: black;
+    font-weight: 600;
+    color: dimgray;
 }
 
 .prod_price {

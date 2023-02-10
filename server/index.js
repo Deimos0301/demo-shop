@@ -28,7 +28,7 @@ const urlencodedParser = express.urlencoded({ extended: true });
 const tokenKey = '1a2b-3c4d-5e6f-7g8h';
 
 app.post('/api/getAuth', urlencodedParser, async (req, res) => {
-    const rows = await pool.query('select * from users where Upper(login) = Upper($1) and password = md5($2)', [req.body.login, req.body.password]);
+    const rows = await pool.query('select * from "getUserInfo"($1, $2, $3)', [req.body.user_id, req.body.login, req.body.password]);
     if (rows.rows && rows.rows.length > 0) {
         let head = Buffer.from(
             JSON.stringify({ alg: 'HS256', typ: 'jwt' })
@@ -50,6 +50,18 @@ app.post('/api/getAuth', urlencodedParser, async (req, res) => {
 
     return res.status(404).json({ message: 'Invalid username or password!' });
 })
+
+app.post('/api/getUserInfo', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select * from "getUserInfo"($1, $2, $3)', [req.body.user_id, req.body.login, req.body.password]);
+
+    return res.json(rows.rows);
+});
+
+app.post('/api/usersUpdate', urlencodedParser, async (req, res) => {
+    await pool.query('call "usersUpdate"($1)', [JSON.stringify(req.body.data)]);
+
+    res.end("done");
+});
 
 // Handles any requests that don't match the ones above
 app.get('*', (req, res) => {
@@ -150,6 +162,22 @@ app.post('/api/getProductDesc', urlencodedParser, async (req, res) => {
 //         res.status(401).json({ message: 'Invalid username or password!' });
 //     }
 // });
+
+app.post('/api/basketInsert', urlencodedParser, async (req, res) => {
+    const host = req.ip.split(':')[3];
+
+    console.log(host, req.body)
+    await pool.query('call public."BasketInsert"($1, $2, $3)', [host, req.body.product_id, req.body.total]);
+
+    res.end("done");
+});
+
+app.post('/api/getBasket', urlencodedParser, async (req, res) => {
+    const host = req.ip.split(':')[3];
+    const rows = await pool.query('select * from public."getBasket"($1, $2)', [host, req.body.user_id]);
+
+    res.json(rows.rows);
+});
 
 app.post('/api/load3Logic', urlencodedParser, async (req, res) => {
     const rows = await pool.query('select ltr_Category_ID from public.Category where ltr_Category_ID is not NULL');

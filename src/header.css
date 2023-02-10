@@ -1,21 +1,37 @@
 .header {
     display: flex;
-    justify-content: left;
+    justify-content: space-between;
     background-color: white;
+    border-bottom: #476070 1px solid;
+    /* border-style: solid; */
 }
 
 .logo {
-    margin-left: 70px;
+    /* margin-left: 70px; */
+    flex-grow: 0;
+}
+
+.head_tools {
+    display: flex;
+    flex-grow: 0;
+    margin: 15px 15px 15px 0;
 }
 
 @media (max-width: 1200px) {
     .sidebar {
         display: block;
+        width: 60px;
+    }
+    .head_tools {
+        display: none;
     }
 }
 
 @media (min-width: 1199px) {
     .sidebar {
         display: none;
+    }
+    .head_tools {
+        display: flex;
     }
 }
