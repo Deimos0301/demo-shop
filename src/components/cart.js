@@ -22,7 +22,7 @@ class Cart extends Component {
 
     render() {
         return (
-            <CartComp />
+            <CartComp userInfo={this.props.userInfo}/>
         )
     }
 };

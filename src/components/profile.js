@@ -94,7 +94,10 @@ class Profile extends Component {
             localStorage.setItem('token', res.token);
             localStorage.setItem('user_id', res.user_id);
             const info = await this.getUserInfo(res.user_id);
-            //console.log(info)
+
+            if (this.props.setUserInfo)
+                this.props.setUserInfo(info);
+
             this.setState({ authenticated: true, errorVisible: false, formVisible: false, userInfo: info });
         } else {
             this.setState({ authenticated: false, errorVisible: true });
@@ -185,6 +188,9 @@ class Profile extends Component {
             if (userInfo.hasOwnProperty(prop) && prop !== 'login')
                 userInfo[prop] = typeof userInfo[prop] === 'number' ? 0 : "";
         }
+    
+        if (this.props.setUserInfo)
+            this.props.setUserInfo(userInfo);
 
         this.setState({ authenticated: false, userInfo: userInfo, formVisible: true });
     }

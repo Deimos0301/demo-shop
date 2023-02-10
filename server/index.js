@@ -4,18 +4,41 @@ const path = require('path');
 const { pool } = require('./sqldb');
 const soap = require('soap');
 const { v4: uuidv4 } = require('uuid');
-const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+//const crypto = require('crypto');
 const fs = require('fs');
 
 const app = express();
 
 app.use(express.json());
+app.use((req, res, next) => {
+    if (req.headers.authorization) {
+        jwt.verify(
+            req.headers.authorization.split(' ')[1],
+            tokenKey,
+            (err, payload) => {
+                if (err) next()
+                else if (payload) {
+                    for (let user of users) {
+                        if (user.id === payload.id) {
+                            req.user = user
+                            next()
+                        }
+                    }
+
+                    if (!req.user) next()
+                }
+            }
+        )
+    }
+
+    next();
+});
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, '../build')));
 
 app.get('/api/getUser', (req, res) => {
-    console.log(req.query.login);
     if (req.query.login) return res.status(200).json(req.query.login)
     else
         return res
@@ -25,27 +48,49 @@ app.get('/api/getUser', (req, res) => {
 
 const urlencodedParser = express.urlencoded({ extended: true });
 
-const tokenKey = '1a2b-3c4d-5e6f-7g8h';
+const tokenKey = '1b2b-3c4e-5e66-7g8h';
+
+const date = new Date();
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJpYXQiOjE2NzYwMTg1MzEsImV4cCI6MTY3NjAxODU5MX0.eUSU3sYrbeeD60FmJyCQxCMWskQkgeSde2kF5pnAhbg";
+jwt.verify(token, tokenKey, (err, decoded) => {
+    if (err) {
+        console.log(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
+        console.log(err);
+    }
+    else {
+        console.log(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
+        console.log("Token verifified successfully");
+    }
+});
 
 app.post('/api/getAuth', urlencodedParser, async (req, res) => {
     const rows = await pool.query('select * from "getUserInfo"($1, $2, $3)', [req.body.user_id, req.body.login, req.body.password]);
     if (rows.rows && rows.rows.length > 0) {
-        let head = Buffer.from(
-            JSON.stringify({ alg: 'HS256', typ: 'jwt' })
-        ).toString('base64');
-
-        let body = Buffer.from(JSON.stringify(rows.rows[0].login)).toString('base64');
-
-        let signature = crypto
-            .createHmac('SHA256', tokenKey)
-            .update(`${head}.${body}`)
-            .digest('base64');
-
+        
         return res.status(200).json({
             user_id: rows.rows[0].user_id,
             login: rows.rows[0].login,
-            token: `${head}.${body}.${signature}`,
-        });
+            
+            token: jwt.sign({ user_id: rows.rows[0].user_id}, tokenKey, {expiresIn: '1m'})
+          });
+
+        // let head = Buffer.from(
+        //     JSON.stringify({ alg: 'HS256', typ: 'jwt' })
+        // ).toString('base64');
+
+        // let body = Buffer.from(JSON.stringify(rows.rows[0].login)).toString('base64');
+
+        // let signature = crypto
+        //     .createHmac('SHA256', tokenKey)
+        //     .update(`${head}.${body}`)
+        //     .digest('base64');
+
+        // return res.status(200).json({
+        //     user_id: rows.rows[0].user_id,
+        //     login: rows.rows[0].login,
+        //     token: `${head}.${body}.${signature}`,
+        // });
+
     }
 
     return res.status(404).json({ message: 'Invalid username or password!' });

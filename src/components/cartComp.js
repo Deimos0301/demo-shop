@@ -25,6 +25,8 @@ class CartComp extends Component {
     componentDidMount = async () => {
         const arr = await this.getBasket();
         this.setState({ basketData: arr });
+
+        console.log(this.props.userInfo);
     }
 
     render() {

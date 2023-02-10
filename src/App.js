@@ -19,7 +19,8 @@ class App extends Component {
             login: '',
             password: '',
             authenticated: false,
-            focusedRowKey: 0
+            focusedRowKey: 0,
+            userInfo: {}
         }
     }
 
@@ -64,6 +65,10 @@ class App extends Component {
         //console.log(e.itemData.id)
     }
 
+    setUserInfo = (info) => {
+        this.setState({userInfo: info});
+    }
+
     render() {
         return (
             <BrowserRouter>
@@ -73,8 +78,8 @@ class App extends Component {
                         <Route exact path='/' element={this.state.authenticated ? <Catalog focusedRowKey={this.state.focusedRowKey}/> : <Login onSubmitClick={this.onSubmitClick} />} />
                         <Route exact path='/auth' element={<Login onSubmitClick={this.onSubmitClick} />}></Route>
                         <Route exact path='/signup' element={<Signup />}></Route>
-                        <Route exact path='/profile' element={<Profile />}></Route>
-                        <Route exact path='/basket' element={<Cart onSubmitClick={this.onSubmitClick}/>}></Route>
+                        <Route exact path='/profile' element={<Profile setUserInfo={this.setUserInfo}/>}></Route>
+                        <Route exact path='/basket' element={<Cart onSubmitClick={this.onSubmitClick} userInfo={this.state.userInfo}/>}></Route>
                     </Routes>
                 </div>
             </BrowserRouter>
