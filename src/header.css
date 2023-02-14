@@ -17,7 +17,7 @@
     margin: 15px 15px 15px 0;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1000px) {
     .sidebar {
         display: block;
         width: 60px;
@@ -27,7 +27,7 @@
     }
 }
 
-@media (min-width: 1199px) {
+@media (min-width: 999px) {
     .sidebar {
         display: none;
     }

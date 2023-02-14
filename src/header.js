@@ -2,14 +2,12 @@ import { React, Component } from "react";
 import { ReactComponent as LogoSVG } from './components/Style/logo.svg';
 import { HashLink } from 'react-router-hash-link';
 import { Button } from 'devextreme-react/button';
-import TextBox from 'devextreme-react/text-box';
 import { Link } from 'react-router-dom';
 import "devextreme/dist/css/dx.light.css";
 import "devextreme/dist/css/dx.common.css";
 
 import SideBar from "./sidebar";
 import './header.css';
-import CartComp from "./components/cartComp";
 
 class Header extends Component {
     constructor(props) {
@@ -32,7 +30,7 @@ class Header extends Component {
             <>
                 <div className='header'>
                     <div className='sidebar'>
-                        <SideBar width={380} itemClick={this.itemClick} />
+                        <SideBar width={380} onFocusedRowChanged={this.props.onFocusedRowChanged} />
                     </div>
 
                     <HashLink smooth to="/#top" className='logo'>

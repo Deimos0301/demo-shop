@@ -66,7 +66,8 @@ body {
 
 /* General sidebar styles */
 .bm-menu {
-  background: #d6dee4;
+  background: #465672;
+  /* background: #d6dee4; */
   padding: 2.5em 1.5em 0;
   font-size: 1.15em;
 }
@@ -94,4 +95,10 @@ body {
 
 .dx-menu-item {
   font-size: 18px;
+}
+
+.list-container {
+  min-height: 440px;
+  width: 100%;
+  height: auto;
 }

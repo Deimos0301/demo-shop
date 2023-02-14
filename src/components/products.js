@@ -1,5 +1,6 @@
 import { React, Component } from "react";
 import { Column, DataGrid, Pager, Paging, SearchPanel, HeaderFilter, LoadPanel, MasterDetail, StateStoring, Toolbar, Item } from 'devextreme-react/data-grid';
+//import "devextreme/dist/css/dx.darkmoon.css";
 import ruMessages from "devextreme/localization/messages/ru.json";
 import { locale, loadMessages } from "devextreme/localization";
 import ProductDesc from "./productDesc";
@@ -18,12 +19,32 @@ class Products extends Component {
     constructor(props) {
         super(props);
 
-        // this.state = {
-        //     currentNode: ""
-        // }
+        this.state = {
+            treeData: []
+        }
 
         loadMessages(ruMessages);
         locale(navigator.language);
+    }
+
+    componentDidMount = async () => {
+        const arr = await this.getCategories2();
+        this.setState({treeData: arr});
+        //console.log(arr)
+    }
+
+    getCategories2 = async () => {
+        const arr = await fetch('/api/getCategories2', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({withBrands: 'false'})
+        });
+
+        const r = await arr.json();
+        r[0].expanded = true;
+        return r;
     }
 
     getSmallImage = (e) => {
@@ -36,18 +57,20 @@ class Products extends Component {
 
     priceRender = (e) => {
         const price = e.data.product_price_retail_rub;
-        return <div style={{fontFamily: 'Courier New', fontWeight: "700", fontSize: "18px"}}>{formatter.format(price.toFixed(0))}</div>
+        return <div style={{fontWeight: "700", fontSize: "17px"}}>{formatter.format(price.toFixed(0))}</div>
     }
 
     render() {
         return (
             <div className="prod_grid">
+               
                 <DataGrid
                     dataSource={this.props.dataSource}
                     showBorders={true}
                     columnAutoWidth={true}
                     wordWrapEnabled={true}
                     keyExpr="product_id"
+                    showRowLines={true}
                     //rowAlternationEnabled={true}
                     hoverStateEnabled={true}
                     focusedRowEnabled={true}
@@ -84,7 +107,7 @@ class Products extends Component {
                         allowSorting={false}
                         alignment="center"
 
-                        caption=""
+                        caption="" 
                         // cssClass="prod_small_image"
                         cellRender={this.getSmallImage}
                         width={70}

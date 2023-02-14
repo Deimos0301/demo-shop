@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from './header';
 import './App.css';
 import Cart from './components/cart';
+import ProductDesc from './components/productDesc';
 
 //set DANGEROUSLY_DISABLE_HOST_CHECK=true && 
 
@@ -19,8 +20,9 @@ class App extends Component {
             login: '',
             password: '',
             authenticated: false,
-            focusedRowKey: 0,
-            userInfo: {}
+            userInfo: {},
+            gridData: [],
+            currentNode: ""
         }
     }
 
@@ -60,26 +62,60 @@ class App extends Component {
             });
     };
 
-    itemClick = (e) => {
-        this.setState({focusedRowKey: e.itemData.id});
-        //console.log(e.itemData.id)
-    }
-
     setUserInfo = (info) => {
         this.setState({userInfo: info});
+    }
+
+    getProducts = async (category_id, brand_id) => {
+        const arr = await fetch('/api/getProducts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ category_id: category_id, brand_id: brand_id })
+        });
+
+        return await arr.json();
+    }
+
+    onFocusedRowChanged = async (e) => {
+        const rowData = e.row && e.row.data;
+
+        if (!rowData) return;
+
+        //console.log(e.component.option('focusedRowKey'));
+        let data = [];
+
+        if (rowData.brand_id !== null)
+            data = await this.getProducts(rowData.category_id, rowData.brand_id);
+
+        this.setState({
+            gridData: data,
+            currentNode: rowData.node_name,
+            category_id: rowData.category_id,
+            brand_id: rowData.brand_id
+        });
     }
 
     render() {
         return (
             <BrowserRouter>
                 <div className="App">
-                    <Header itemClick={this.itemClick}/>
+                    <Header onFocusedRowChanged={this.onFocusedRowChanged}/>
+
                     <Routes>
-                        <Route exact path='/' element={this.state.authenticated ? <Catalog focusedRowKey={this.state.focusedRowKey}/> : <Login onSubmitClick={this.onSubmitClick} />} />
+                        <Route exact path='/' element={
+                            <Catalog 
+                                onFocusedRowChanged={this.onFocusedRowChanged} 
+                                gridData={this.state.gridData}
+                                currentNode={this.state.currentNode}
+                            />}
+                        />
                         <Route exact path='/auth' element={<Login onSubmitClick={this.onSubmitClick} />}></Route>
                         <Route exact path='/signup' element={<Signup />}></Route>
                         <Route exact path='/profile' element={<Profile setUserInfo={this.setUserInfo}/>}></Route>
                         <Route exact path='/basket' element={<Cart onSubmitClick={this.onSubmitClick} userInfo={this.state.userInfo}/>}></Route>
+                        <Route path='/product/:id' element={<ProductDesc />} />
                     </Routes>
                 </div>
             </BrowserRouter>

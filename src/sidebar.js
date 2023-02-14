@@ -1,9 +1,17 @@
 import { slide as Burger } from "react-burger-menu";
 import { React, Component } from "react";
 import { Link } from 'react-router-dom';
-import Menu from 'devextreme-react/menu';
+// import List from 'devextreme-react/list';
+// import Menu from 'devextreme-react/menu';
 import './sidebar.css';
+import './components/Style/moon.css';
+//import "devextreme/dist/css/moon.css";
+import Category from "./components/category";
+//import "devextreme/dist/css/dx.common.css";
 
+// function GroupTemplate(item) {
+//     return <div style={{ fontSize: "18px" }}>{item.name}</div>;
+// }
 
 class SideBar extends Component {
     constructor(props) {
@@ -11,14 +19,16 @@ class SideBar extends Component {
 
         this.state = {
             isOpen: false,
-            treeSource: []
+            treeSource: [],
+            listSource: []
         }
     }
 
     componentDidMount = async () => {
         const data = await this.getCategories2();
+        const list = await this.getCategoriesJson();
 
-        this.setState({ treeSource: data });
+        this.setState({ treeSource: data, listSource: list });
     }
 
     getCategories2 = async () => {
@@ -30,6 +40,19 @@ class SideBar extends Component {
         });
 
         return await arr.json();
+    }
+
+    getCategoriesJson = async () => {
+        const arr = await fetch('/api/getCategoriesJson', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const a = await arr.json();
+
+        return a[0].val;
     }
 
     closeMenu = () => {
@@ -47,11 +70,33 @@ class SideBar extends Component {
 
     render() {
         return (
-            <Burger right={false} width={this.props.width} isOpen={this.state.isOpen} onOpen={this.handleIsOpen} onClose={this.handleIsOpen}>
+            <Burger right={false} width={this.props.width} isOpen={this.state.isOpen} onOpen={this.handleIsOpen} onClose={this.handleIsOpen} outerContainerId="header">
                 <div style={{color: 'maroon', fontSize: "20px", fontWeight: "600", lineHeight: "40px", textDecoration: "none"}}>
-                    <div> <Link to="/profile">Личный кабинет</Link></div>
-                    <div >Каталог:</div>
-                    <Menu
+                    <div> <Link to="/profile" style={{color: "#aec5d8"}}>Личный кабинет</Link></div>
+                    <div> <Link to="/basket" style={{color: "#aec5d8"}}>Корзина</Link></div>
+
+                    {/* <div className="list-container">
+                        <List
+                            dataSource={this.state.listSource}
+                            height="100%"
+                            grouped={true}
+                            collapsibleGroups={true}
+                            displayExpr="name"
+                            // grouped={false}
+                            groupRender={GroupTemplate}
+                        />
+                    </div> */}
+
+                    <div style={{color: "#ff9999"}}>Каталог:</div>
+
+                    <div className="dx-swatch-moon" style={{height: "500px"}}>
+                        <Category 
+                            onFocusedRowChanged={this.props.onFocusedRowChanged}
+                        />
+                    </div>
+
+
+                    {/* <Menu
                         dataSource={this.state.treeSource}
                         displayExpr="name"
                         showFirstSubmenuMode="onHover"
@@ -59,7 +104,7 @@ class SideBar extends Component {
                         hideSubmenuOnMouseLeave={true}
                         onItemClick={this.itemClick}
                     >
-                    </Menu>
+                    </Menu> */}
                 </div>
             </Burger>
         );

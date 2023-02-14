@@ -25,8 +25,9 @@ class Profile extends Component {
         //localStorage.removeItem('token');
         const token = localStorage.getItem('token');
         const user_id = localStorage.getItem('user_id');
+        const verify = await this.verifyToken(token);
 
-        if (token && user_id) {
+        if (verify.status === 'OK' && user_id) {
             const info = await this.getUserInfo(user_id);
             this.setState({ authenticated: true, userInfo: info });
             //console.log(info)
@@ -57,6 +58,18 @@ class Profile extends Component {
             },
             body: JSON.stringify({ user_id: null, login: login, password: this.state.password })
         });
+        return await res.json();
+    }
+
+    verifyToken = async (token) => {
+        const res = await fetch('/api/verifyToken', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: token })
+        });
+
         return await res.json();
     }
 
@@ -221,7 +234,7 @@ class Profile extends Component {
                     container=".App"
                     titleRender={this.titleRenderer}
                     width={380}
-                    height={250}
+                    height={300}
                 >
                     <ToolbarItem
                         widget="dxButton"
@@ -279,6 +292,10 @@ class Profile extends Component {
 
                     <div className="dx-field" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                         <div> <Link to="/signup" onClick={() => { this.hideLoginForm() }}> Регистрация  </Link> </div>
+                    </div>
+
+                    <div className="dx-field" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <div> <Link to="/" onClick={() => { this.hideLoginForm() }}> На главную  </Link> </div>
                     </div>
                 </Popup>
 
