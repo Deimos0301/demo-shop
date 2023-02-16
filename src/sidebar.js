@@ -71,7 +71,11 @@ class SideBar extends Component {
     render() {
         return (
             <Burger right={false} width={this.props.width} isOpen={this.state.isOpen} onOpen={this.handleIsOpen} onClose={this.handleIsOpen} outerContainerId="header">
+<<<<<<< Updated upstream
                 <div style={{color: 'maroon', fontSize: "20px", fontWeight: "600", lineHeight: "40px", textDecoration: "none"}}>
+=======
+                <div style={{ color: 'maroon', fontSize: "20px", fontWeight: "600", lineHeight: "40px", textDecoration: "none" }}>
+>>>>>>> Stashed changes
                     <div> <Link to="/profile" style={{color: "#aec5d8"}}>Личный кабинет</Link></div>
                     <div> <Link to="/basket" style={{color: "#aec5d8"}}>Корзина</Link></div>
 

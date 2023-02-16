@@ -109,7 +109,11 @@ class ProductDesc extends Component {
         } = this.state.prod;
 
         return <div style={{ marginLeft: "10px", marginTop: "10px" }}>
+<<<<<<< Updated upstream
             <div className="full_name" style={{maxWidth: '800px'}}>{product_full_name}</div>
+=======
+            <div className="full_name" style={{ maxWidth: '800px' }}>{product_full_name}</div>
+>>>>>>> Stashed changes
 
             <div style={{ display: "flex", flexDirection: "column" }}>
                 <div className="desc_row">
@@ -175,6 +179,7 @@ class ProductDesc extends Component {
                 Технические характеристики
             </div>
 
+<<<<<<< Updated upstream
             <div style={{maxWidth: "800px"}}>
             <DataGrid
                 dataSource={this.state.desc}
@@ -189,6 +194,22 @@ class ProductDesc extends Component {
                 <Column dataField="attr_name" alignment="left" />
                 <Column dataField="value" alignment="left" />
             </DataGrid>
+=======
+            <div style={{ maxWidth: "800px" }}>
+                <DataGrid
+                    dataSource={this.state.desc}
+                    showBorders={true}
+                    keyExpr="attribute_id"
+                    showColumnHeaders={false}
+                    wordWrapEnabled={true}
+                >
+                    <Grouping autoExpandAll={true} />
+                    <Paging pageSize={100} />
+                    <Column dataField="group_name" groupIndex={0} groupCellRender={this.renderGroup} />
+                    <Column dataField="attr_name" alignment="left" />
+                    <Column dataField="value" alignment="left" />
+                </DataGrid>
+>>>>>>> Stashed changes
             </div>
 
         </div>

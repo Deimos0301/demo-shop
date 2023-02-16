@@ -186,7 +186,7 @@ class Profile extends Component {
     }
 
     onPasswordChanged = (data) => {
-        this.setState({password: data.value});
+        this.setState({ password: data.value });
     }
 
     onSaveProfile = async (e) => {
@@ -201,7 +201,7 @@ class Profile extends Component {
             if (userInfo.hasOwnProperty(prop) && prop !== 'login')
                 userInfo[prop] = typeof userInfo[prop] === 'number' ? 0 : "";
         }
-    
+
         if (this.props.setUserInfo)
             this.props.setUserInfo(userInfo);
 
@@ -251,7 +251,7 @@ class Profile extends Component {
                     </ToolbarItem> */}
 
                     <div className='profile_row'>
-                    <div className='profile_item'>
+                        <div className='profile_item'>
                             <div className='profile_label'>Пользователь:</div>
                             <TextBox text={this.state.userInfo.login} className="profile_input" placeholder='Телефон или email' onValueChanged={this.onLoginChanged} />
                         </div>

@@ -48,19 +48,34 @@ app.get('/api/getUser', (req, res) => {
 
 const urlencodedParser = express.urlencoded({ extended: true });
 
-const tokenKey = '1b2b-3c4e-5e66-7g8h';
+const tokenKey = '6b4b-3c4e-5e66-7g8h';
 
-const date = new Date();
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJpYXQiOjE2NzYwMTg1MzEsImV4cCI6MTY3NjAxODU5MX0.eUSU3sYrbeeD60FmJyCQxCMWskQkgeSde2kF5pnAhbg";
-jwt.verify(token, tokenKey, (err, decoded) => {
-    if (err) {
-        console.log(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
-        console.log(err);
+verifyToken = (token) => {
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, tokenKey, (err, decoded) => {
+            if (err)
+                reject(err);
+            else
+                resolve(true);
+        });
+    });
+
+}
+
+app.post('/api/verifyToken', urlencodedParser, async (req, res) => {
+    let r;
+    let msg = 'Token verified successfully!';
+
+    try {
+        r = await verifyToken(req.body.token);
+    } catch(e) {
+        msg = e;
     }
-    else {
-        console.log(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
-        console.log("Token verifified successfully");
-    }
+
+    if (r === true)
+        res.status(200).json({status: 'OK', message: msg});
+    else
+        res.status(511).json({ status: 'FAIL', message: 'Token expired!' });
 });
 
 app.post('/api/getAuth', urlencodedParser, async (req, res) => {
@@ -71,26 +86,8 @@ app.post('/api/getAuth', urlencodedParser, async (req, res) => {
             user_id: rows.rows[0].user_id,
             login: rows.rows[0].login,
             
-            token: jwt.sign({ user_id: rows.rows[0].user_id}, tokenKey, {expiresIn: '1m'})
+            token: jwt.sign({ user_id: rows.rows[0].user_id}, tokenKey, {expiresIn: '1h'})
           });
-
-        // let head = Buffer.from(
-        //     JSON.stringify({ alg: 'HS256', typ: 'jwt' })
-        // ).toString('base64');
-
-        // let body = Buffer.from(JSON.stringify(rows.rows[0].login)).toString('base64');
-
-        // let signature = crypto
-        //     .createHmac('SHA256', tokenKey)
-        //     .update(`${head}.${body}`)
-        //     .digest('base64');
-
-        // return res.status(200).json({
-        //     user_id: rows.rows[0].user_id,
-        //     login: rows.rows[0].login,
-        //     token: `${head}.${body}.${signature}`,
-        // });
-
     }
 
     return res.status(404).json({ message: 'Invalid username or password!' });
@@ -120,20 +117,17 @@ app.all('/*', function (req, res, next) {
     next();
 });
 
-app.listen(config.port);
-
 app.post('/api/getCategories', urlencodedParser, async (req, res) => {
-    const rows = await pool.query('select * from "getCategories"()');
+    const rows = await pool.query(`select * from "getCategories"(${!req.body.withBrands || req.body.withBrands === 'true' ? true : false})`);
     //await pool.query('select * from users');
-    //console.log('getCategories:', req.headers.host);
     res.json(rows.rows);
 });
 
-// var rawData = [
-//     { id: 1, name: "Комплектующие для компьютеров", parent_id: 0 },
-//     { id: 2,name: "Видеокарты", parent_id: 1},
-//     { id: 555, name: "ASUS", parent_id: 2}
-//   ];
+app.post('/api/getCategoriesJson', urlencodedParser, async (req, res) => {
+    const rows = await pool.query(`select * from "getCategoriesJson"()`);
+    //await pool.query('select * from users');
+    res.json(rows.rows);
+});
 
 
 pack = (data) => {
@@ -150,7 +144,9 @@ pack = (data) => {
 //   console.log(JSON.stringify(pack(rawData, 1, 4)));
 
 app.post('/api/getCategories2', urlencodedParser, async (req, res) => {
-    const rows = await pool.query('select id, name, Coalesce(parent_id,0) as parent_id, category_id, brand_id, iscat from "getCategories"()');
+    const rows = await pool.query(
+        `select id, name, Coalesce(parent_id,0) as parent_id, category_id, brand_id, iscat 
+        from "getCategories"(${!req.body.withBrands || req.body.withBrands === 'true' ? true : false})`);
 
     const pa = pack(rows.rows);
     //console.log(pa[0].items[0]);
@@ -160,7 +156,7 @@ app.post('/api/getCategories2', urlencodedParser, async (req, res) => {
 
 app.post('/api/getProducts', urlencodedParser, async (req, res) => {
     //console.log(req.body);
-    const rows = await pool.query('select * from "getProducts"($1, $2)', [req.body.category_id, req.body.brand_id]);
+    const rows = await pool.query('select * from "getProducts"($1, $2, $3)', [req.body.category_id, req.body.brand_id, req.body.product_id]);
     res.json(rows.rows);
     //res.end('done');
 });
@@ -197,22 +193,26 @@ app.post('/api/getProductDesc', urlencodedParser, async (req, res) => {
     //res.end('done');
 });
 
-// app.post('/api/getAuth', urlencodedParser, async (req, res) => {
-//     const rows = await pool.query('select * from users where Upper(login) = Upper($1) and password = md5($2)', [req.body.login, req.body.password]);
-//     //console.log(rows.rows);
-
-//     if (rows.rows && rows.rows.length > 0)
-//         res.end(JSON.stringify({ token: uuidv4(), result: true }));
-//     else {
-//         res.status(401).json({ message: 'Invalid username or password!' });
-//     }
-// });
-
 app.post('/api/basketInsert', urlencodedParser, async (req, res) => {
     const host = req.ip.split(':')[3];
 
     //console.log(host, req.body)
-    await pool.query('call public."BasketInsert"($1, $2, $3)', [host, req.body.product_id, req.body.total]);
+    await pool.query('call public."BasketInsert"($1, $2, $3)', [host, req.body.product_id, req.body.quantity]);
+
+    res.end("done");
+});
+
+app.post('/api/basketDelete', urlencodedParser, async (req, res) => {
+    //console.log(host, req.body)
+    await pool.query('call public."BasketDelete"($1)', [req.body.basket_id]);
+
+    res.end("done");
+});
+
+
+app.post('/api/basketUpdate', urlencodedParser, async (req, res) => {
+    //console.log(host, req.body)
+    await pool.query('call public."BasketUpdate"($1, $2)', [req.body.basket_id, req.body.quantity]);
 
     res.end("done");
 });
@@ -525,5 +525,8 @@ load3Logic = async (enabledCategories) => {
 }
 
 //load3Logic([71, 56, 113, 237, 69]);
+
+app.listen(config.port);
+
 
 console.log(`App is listening on port ${config.port}`);

@@ -61,7 +61,11 @@ class CartComp extends Component {
 
     componentDidMount = async () => {
         const arr = await this.getBasket();
+<<<<<<< Updated upstream
 
+=======
+        
+>>>>>>> Stashed changes
         this.setState({ basketData: arr, total: this.getTotal(arr) });
         // console.log(this.props.userInfo);
     }
@@ -119,6 +123,7 @@ class CartComp extends Component {
         const href = `/product?product_id=${e.product_id}`;
 
         return <div className='cart-list'>
+<<<<<<< Updated upstream
             <Link to={href}> <div className='cart_image' style={{ backgroundImage: `url(${e.product_image_short})` }}>  </div> </Link>
 
 
@@ -130,6 +135,19 @@ class CartComp extends Component {
 
                 <div className='cart-action'>
                     <div><Button icon="minus" onClick={this.onMinusClick} disabled={e.quantity < 2} basket_id={e.basket_id} /></div>
+=======
+            <Link to={href}> <div className='cart_image' style={{backgroundImage: `url(${e.product_image_short})`}}>  </div> </Link>
+            
+
+            <div className='cart-item' >
+                <div style={{fontSize: "15px", lineHeight: "20px"}}>{e.product_name}</div>
+                <div style={{marginTop: "10px", }}>Бренд: {e.brand_name}</div>
+                <div style={{marginTop: "2px", }}>Артикул: {e.product_articul}</div>
+                <div style={{marginTop: "7px", fontWeight: "500"}}>Цена: {formatter.format(e.price.toFixed([0]))}</div>
+
+                <div className='cart-action'>
+                    <div><Button icon="minus" onClick={this.onMinusClick} disabled={e.quantity < 2} basket_id={e.basket_id}/></div>
+>>>>>>> Stashed changes
 
                     <NumberBox
                         width="50px"
@@ -139,7 +157,12 @@ class CartComp extends Component {
                         showSpinButtons={false}
                     />
 
+<<<<<<< Updated upstream
                     <div><Button icon="plus" onClick={this.onPlusClick} basket_id={e.basket_id} /></div>
+=======
+                    <div><Button icon="plus" onClick={this.onPlusClick} basket_id={e.basket_id}/></div>
+                    <div style={{flexGrow: "6"}}></div>
+>>>>>>> Stashed changes
                     <div> <Button text="Удалить" onClick={this.deleteItem} basket_id={e.basket_id}></Button> </div>
                 </div>
             </div>
@@ -192,7 +215,11 @@ class CartComp extends Component {
                     itemRender={this.cartItem}
                     repaintChangesOnly={false}>
                 </List>
+<<<<<<< Updated upstream
                 <div style={{ fontSize: "16px", fontWeight: "600" }}>Итого: {formatter.format(this.state.total.toFixed([0]))}</div>
+=======
+                <div style={{fontSize: "16px", fontWeight: "600"}}>Итого: {formatter.format(this.state.total.toFixed([0]))}</div>
+>>>>>>> Stashed changes
             </div>
         );
     }
