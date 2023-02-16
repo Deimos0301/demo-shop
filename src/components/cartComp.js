@@ -126,24 +126,25 @@ class CartComp extends Component {
                 <div style={{ fontSize: "15px", lineHeight: "20px" }}>{e.product_name}</div>
                 <div style={{ marginTop: "10px", }}>Бренд: {e.brand_name}</div>
                 <div style={{ marginTop: "2px", }}>Артикул: {e.product_articul}</div>
-                <div style={{marginTop: "7px", fontWeight: "500"}}>Стоимость: {formatter.format(e.price.toFixed([0]))}</div>
+                <div style={{ marginTop: "7px", fontWeight: "500" }}>Цена: {formatter.format(e.price.toFixed([0]))}</div>
 
                 <div className='cart-action'>
-                    <div><Button icon="minus" onClick={this.onMinusClick} disabled={e.quantity < 2} basket_id={e.basket_id} /></div>
+                    <div>
+                        <Button icon="minus" onClick={this.onMinusClick} disabled={e.quantity < 2} basket_id={e.basket_id} />
+                    </div>
 
                     <NumberBox
                         width="50px"
                         defaultValue={1}
                         value={e.quantity}
                         min={1}
-                        showSpinButtons={false}
-                    />
+                        showSpinButtons={false}/>
 
                     <div><Button icon="plus" onClick={this.onPlusClick} basket_id={e.basket_id} /></div>
+                    <div style={{ flexGrow: "6" }}></div>
                     <div> <Button text="Удалить" onClick={this.deleteItem} basket_id={e.basket_id}></Button> </div>
                 </div>
             </div>
-
         </div>
     }
 
