@@ -70,24 +70,6 @@
   padding-bottom: 5%;
 }
 
-.cart-list {
-  display: flex;
-  align-items: center;
-  justify-content: left;
-}
-
-.cart-prod-name {
-  font-size: 18px;
-  margin-left: 10px;
-}
-
-.cart-prod-price {
-  font-size: 20px;
-  font-weight: bold;
-  margin-left: 20px;
-  text-align: right;
-}
-
 
 @media (max-width: 1100px) {
   .input-form_wrap {

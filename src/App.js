@@ -22,7 +22,8 @@ class App extends Component {
             authenticated: false,
             userInfo: {},
             gridData: [],
-            currentNode: ""
+            currentNode: "",
+            gridRow: {}
         }
     }
 
@@ -97,6 +98,10 @@ class App extends Component {
         });
     }
 
+    onGridFocusedRowChanged = (e) => {
+        this.setState({rowData: e.row.data});
+    }
+
     render() {
         return (
             <BrowserRouter>
@@ -107,6 +112,7 @@ class App extends Component {
                         <Route exact path='/' element={
                             <Catalog 
                                 onFocusedRowChanged={this.onFocusedRowChanged} 
+                                onGridFocusedRowChanged={this.onGridFocusedRowChanged}
                                 gridData={this.state.gridData}
                                 currentNode={this.state.currentNode}
                             />}
@@ -115,7 +121,7 @@ class App extends Component {
                         <Route exact path='/signup' element={<Signup />}></Route>
                         <Route exact path='/profile' element={<Profile setUserInfo={this.setUserInfo}/>}></Route>
                         <Route exact path='/basket' element={<Cart onSubmitClick={this.onSubmitClick} userInfo={this.state.userInfo}/>}></Route>
-                        <Route path='/product/:id' element={<ProductDesc />} />
+                        <Route path='/product' element={<ProductDesc /*rowData={this.state.rowData}*//>} />
                     </Routes>
                 </div>
             </BrowserRouter>

@@ -10,36 +10,53 @@ class ProductDesc extends Component {
     constructor(props) {
         super(props);
 
+        this.product_id = this.props.data ? this.props.data.data.product_id : 0;
+
         this.state = {
+            prod: {},
             minusDisabled: true,
-            total: 1,
+            quantity: 1,
             desc: []
         }
     }
 
     componentDidMount = async () => {
-        //console.log(this.props.data)
-        const desc = await this.getProductDesc(this.props.data.data.product_id);
+        if (!this.product_id) {
+            const queryParameters = new URLSearchParams(window.location.search);
+            this.product_id = queryParameters.get("product_id");
+        }
 
-        this.setState({ desc: desc });
+        if (this.product_id) {
+            const prod = await this.getProducts();
+
+            const desc = await this.getProductDesc();
+
+            this.setState({ desc: desc, prod: prod[0] });
+        }
     }
 
-    getProductDesc = async (product_id) => {
+    getProductDesc = async () => {
         const arr = await fetch('/api/getProductDesc2', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ product_id: product_id })
+            body: JSON.stringify({ product_id: this.product_id })
         });
 
-        const r = await arr.json();
-        //console.log(r)
+        return await arr.json();
+    }
 
-        // let cnt = 0;
-        // r.map(item => cnt = cnt + item.attribs.length);
-        // r.count = cnt;
-        return r;
+    getProducts = async () => {
+        const arr = await fetch('/api/getProducts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ product_id: this.product_id })
+        });
+
+        return await arr.json();
     }
 
     basketInsert = async () => {
@@ -48,7 +65,10 @@ class ProductDesc extends Component {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ product_id: this.props.data.data.product_id, total: this.state.total })
+            body: JSON.stringify({
+                product_id: this.props.data.data.product_id,
+                quantity: this.state.quantity
+            })
         });
     }
 
@@ -57,97 +77,105 @@ class ProductDesc extends Component {
     }
 
     onMinusClick = (e) => {
-        this.setState({minusDisabled: this.state.total <= 2});
+        if (this.state.quantity === 1) return;
 
-        if (this.state.total === 1) return;
-
-        const val = this.state.total - 1;
-        this.setState({total: val})
+        const val = this.state.quantity - 1;
+        this.setState({ quantity: val, minusDisabled: this.state.quantity <= 2 })
     }
 
     onPlusClick = (e) => {
-        const val = this.state.total + 1;
-        this.setState({total: val, minusDisabled: false});
+        const val = this.state.quantity + 1;
+        this.setState({ quantity: val, minusDisabled: false });
     }
 
     render() {
-        const prod = this.props.data.data;
-
         let formatter = new Intl.NumberFormat("ru", {
             style: "currency",
             currency: "RUB",
             minimumFractionDigits: 0
         });
 
-        //console.log('render', this.desc);
+        const {
+            product_full_name,
+            product_price_retail_rub,
+            brand_name,
+            product_articul,
+            product_partnumber,
+            category_name,
+            product_warranty,
+            product_remain_text,
+            image_prefix,
+            product_image_main
+        } = this.state.prod;
 
-        return <div>
-            <div className="full_name">{prod.product_full_name}</div>
+        return <div style={{ marginLeft: "10px", marginTop: "10px" }}>
+            <div className="full_name" style={{maxWidth: '800px'}}>{product_full_name}</div>
 
             <div style={{ display: "flex", flexDirection: "column" }}>
                 <div className="desc_row">
                     <div className="desc_head">Бренд:</div>
-                    <div className="desc_value">{prod.brand_name}</div>
+                    <div className="desc_value">{brand_name}</div>
                 </div>
 
                 <div className="desc_row">
                     <div className="desc_head">Артикул:</div>
-                    <div className="desc_value">{prod.product_articul}</div>
+                    <div className="desc_value">{product_articul}</div>
                 </div>
 
                 <div className="desc_row">
                     <div className="desc_head">УИН:</div>
-                    <div className="desc_value">{prod.product_partnumber}</div>
+                    <div className="desc_value">{product_partnumber}</div>
                 </div>
 
                 <div className="desc_row">
                     <div className="desc_head">Категория:</div>
-                    <div className="desc_value">{prod.category_name}</div>
+                    <div className="desc_value">{category_name}</div>
                 </div>
 
                 <div className="desc_row">
                     <div className="desc_head">Гарантия:</div>
-                    <div className="desc_value">{prod.product_warranty} мес.</div>
+                    <div className="desc_value">{product_warranty} мес.</div>
                 </div>
 
                 <div className="desc_row">
                     <div className="desc_head">Наличие на складе:</div>
-                    <div className="desc_value">{prod.product_remain_text}</div>
+                    <div className="desc_value">{product_remain_text}</div>
                 </div>
 
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px", marginBottom: "20px" }}>
-                <div className="price" style={{ fontSize: "20px", fontWeight: 500 }}>Цена: {formatter.format(prod.product_price_retail_rub.toFixed(0))}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px", marginBottom: "20px", maxWidth: '800px' }}>
+                <div className="price" style={{ fontSize: "20px", fontWeight: 500 }}>Цена: {product_price_retail_rub ? formatter.format(product_price_retail_rub.toFixed(0)) : 0}</div>
                 <div style={{ flexGrow: 6 }}></div>
 
                 <div style={{ display: "flex", marginLeft: "5px", justifyContent: "center", alignItems: "center" /*height: "28px"*/ }}>
-                    <div><Button icon="minus" onClick={this.onMinusClick} disabled={this.state.minusDisabled}/></div>
-    
+                    <div><Button icon="minus" onClick={this.onMinusClick} disabled={this.state.minusDisabled} /></div>
+
                     <NumberBox
                         width="50px"
                         defaultValue={1}
-                        value={this.state.total}
+                        value={this.state.quantity}
                         min={1}
                         showSpinButtons={false}
                     />
 
-                    <div><Button icon="plus" onClick={this.onPlusClick}/></div>
-            </div>
+                    <div><Button icon="plus" onClick={this.onPlusClick} /></div>
+                </div>
 
-                <div style={{ display: "flex", marginLeft: "5px" /*height: "28px"*/ }}>
+                <div style={{ display: "flex", marginLeft: "5px", marginRight: "10px" /*height: "28px"*/ }}>
                     <Button text="В корзину" type="success" icon="add" stylingMode="contained" onClick={this.basketInsert}>  </Button>
                 </div>
             </div>
 
             <div className="wrap_photo" style={{ display: "flex" }}>
-                <div className="prod_photo" style={{ backgroundImage: `url(${prod.image_prefix + prod.product_image_main})` }}>
-                    {/* <img src={prod.image_prefix + prod.product_image_main} alt="Фото отсутстует" /> */}
-                </div>
+                <div className="prod_photo" style={{ backgroundImage: `url(${image_prefix + product_image_main})` }} />
             </div>
 
-            <div style={{width: "100%", textAlign: "center", backgroundColor: "#959aad", color: "white", fontSize: "20px", fontWeight: "600", marginBottom: "10px"}}>Технические характеристики</div>
+            <div style={{ width: "100%", textAlign: "center", backgroundColor: "#959aad", color: "white", fontSize: "20px", fontWeight: "600", marginBottom: "10px", maxWidth: "800px" }} >
+                Технические характеристики
+            </div>
 
+            <div style={{maxWidth: "800px"}}>
             <DataGrid
                 dataSource={this.state.desc}
                 showBorders={true}
@@ -161,6 +189,7 @@ class ProductDesc extends Component {
                 <Column dataField="attr_name" alignment="left" />
                 <Column dataField="value" alignment="left" />
             </DataGrid>
+            </div>
 
         </div>
     }

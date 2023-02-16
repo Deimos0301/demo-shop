@@ -1,6 +1,7 @@
 import { React, Component } from "react";
 import { Column, DataGrid, Pager, Paging, SearchPanel, HeaderFilter, LoadPanel, MasterDetail, StateStoring, Toolbar, Item } from 'devextreme-react/data-grid';
 //import "devextreme/dist/css/dx.darkmoon.css";
+import { Link } from 'react-router-dom';
 import ruMessages from "devextreme/localization/messages/ru.json";
 import { locale, loadMessages } from "devextreme/localization";
 import ProductDesc from "./productDesc";
@@ -50,9 +51,9 @@ class Products extends Component {
     getSmallImage = (e) => {
         if (!e.row.data.product_image_short) return;
         const url = e.row.data.image_prefix + e.row.data.product_image_short;
-        const href = `/product/${e.row.data.product_id}`;
-        //console.log(e.row.data)
-        return <a href={href}>  <img src={url} alt=""></img> </a>;
+        const href = `/product?product_id=${e.row.data.product_id}`;
+        //const href = '/product';
+        return <Link to={href}><img src={url} alt=""></img></Link>
     }
 
     priceRender = (e) => {
@@ -75,6 +76,7 @@ class Products extends Component {
                     hoverStateEnabled={true}
                     focusedRowEnabled={true}
                     columnHidingEnabled={true}
+                    onFocusedRowChanged={this.props.onGridFocusedRowChanged}
                 //dataRowRender={ProductCard}
                 >
                     <StateStoring enabled={true} type="localStorage" storageKey="prod_grid" />

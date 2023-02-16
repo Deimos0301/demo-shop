@@ -14,7 +14,7 @@
 .head_tools {
     display: flex;
     flex-grow: 0;
-    margin: 15px 15px 15px 0;
+    margin: 15px 5px 15px 0;
 }
 
 @media (max-width: 1000px) {
@@ -22,16 +22,16 @@
         display: block;
         width: 60px;
     }
-    .head_tools {
+    /* .head_tools {
         display: none;
-    }
+    } */
 }
 
 @media (min-width: 999px) {
     .sidebar {
         display: none;
     }
-    .head_tools {
+    /* .head_tools {
         display: flex;
-    }
+    } */
 }
