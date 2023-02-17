@@ -1,5 +1,5 @@
 import { React, Component } from "react";
-import { ReactComponent as LogoSVG } from './components/Style/logo.svg';
+import logo from './components/Style/logo.svg';
 import { HashLink } from 'react-router-hash-link';
 import { Button } from 'devextreme-react/button';
 import { Link } from 'react-router-dom';
@@ -58,7 +58,9 @@ class Header extends Component {
                         <SideBar width={380} onFocusedRowChanged={this.props.onFocusedRowChanged} />
                     </div>
 
-                    <HashLink smooth to="/#top" className='logo' />
+                    <HashLink smooth to="/#top" className='logo'>
+                        <img src={logo} style={{color: 'black'}}></img>
+                    </HashLink>
 
                     <div style={{ flexGrow: "6" }}></div>
 

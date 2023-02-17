@@ -23,30 +23,17 @@ class Catalog extends Component {
                         onFocusedRowChanged={this.props.onFocusedRowChanged}
                         // focusedRowKey={this.state.focusedRowKey}
                         renderCell={this.renderCell}
-<<<<<<< Updated upstream
                         />
-=======
-                    />
->>>>>>> Stashed changes
                 </div>
 
                 <div className="product_list">
                     <div className="grid_header"> Товары </div>
 
-<<<<<<< Updated upstream
                 <Products
                         dataSource={this.props.gridData}
                         currentNode={this.props.currentNode}
                         onGridFocusedRowChanged={this.props.onGridFocusedRowChanged}
                 />
-=======
-                    <Products
-                        dataSource={this.props.gridData}
-                        currentNode={this.props.currentNode}
-                        onGridFocusedRowChanged={this.props.onGridFocusedRowChanged}
-                    />
-                </div>
->>>>>>> Stashed changes
             </div>
             </div>
 
