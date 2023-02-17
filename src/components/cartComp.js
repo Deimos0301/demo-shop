@@ -143,7 +143,7 @@ class CartComp extends Component {
     }
 
     onQuantityChanged = (e) => {
-        alert('Изменили значения вручную')
+        console.log(e.value); // Получили новое значение
     }
 
     cartItem = (e) => {
