@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Column, DataGrid } from 'devextreme-react/data-grid';
+//import { Column, DataGrid } from 'devextreme-react/data-grid';
 import { Button } from 'devextreme-react/button';
 import { NumberBox } from 'devextreme-react/number-box';
 import 'devextreme/dist/css/dx.light.css';
@@ -138,7 +138,8 @@ class CartComp extends Component {
                         defaultValue={1}
                         value={e.quantity}
                         min={1}
-                        showSpinButtons={false}/>
+                        showSpinButtons={false}
+                    />
 
                     <div><Button icon="plus" onClick={this.onPlusClick} basket_id={e.basket_id} /></div>
                     <div style={{ flexGrow: "6" }}></div>
@@ -193,6 +194,7 @@ class CartComp extends Component {
                     itemRender={this.cartItem}
                     repaintChangesOnly={false}>
                 </List>
+
                 <div style={{ fontSize: "16px", fontWeight: "600" }}>Итого: {formatter.format(this.state.total.toFixed([0]))}</div>
             </div>
         );
