@@ -193,7 +193,7 @@ class CartComp extends Component {
                     repaintChangesOnly={false}>
                 </List>
 
-                <div style={{fontSize: "16px", fontWeight: "600"}}>Итого: {formatter.format(this.state.total.toFixed([0]))}</div>
+                <div style={{fontSize: "16px", fontWeight: "600", marginRight: "10px", textAlign: "end"}}>Итого: {formatter.format(this.state.total.toFixed([0]))}</div>
             </div>
         );
     }
