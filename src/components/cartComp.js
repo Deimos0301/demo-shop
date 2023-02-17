@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Column, DataGrid } from 'devextreme-react/data-grid';
+//import { Column, DataGrid } from 'devextreme-react/data-grid';
 import { Button } from 'devextreme-react/button';
 import { NumberBox } from 'devextreme-react/number-box';
 import 'devextreme/dist/css/dx.light.css';

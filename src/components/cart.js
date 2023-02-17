@@ -3,9 +3,6 @@ import '../App.css';
 import CartComp from './cartComp';
 
 class Cart extends Component {
-    constructor(props) {
-        super(props)
-    }
 
     getBasket = async () => {
         const arr = await fetch('/api/getBasket', {
