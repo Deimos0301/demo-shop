@@ -59,7 +59,7 @@ class Header extends Component {
                     </div>
 
                     <HashLink smooth to="/#top" className='logo'>
-                        <img src={logo} style={{color: 'black'}}></img>
+                        <img src={logo} style={{color: 'black'}} alt=""></img>
                     </HashLink>
 
                     <div style={{ flexGrow: "6" }}></div>
