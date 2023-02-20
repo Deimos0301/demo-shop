@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { TreeList, Column, Selection, Scrolling, StateStoring } from 'devextreme-react/tree-list';
 import "devextreme/dist/css/dx.light.css";
 import "devextreme/dist/css/dx.common.css";
+import store from "../stores/ShopStore";
 
 //themes.current("generic.dark");
 
@@ -16,8 +17,6 @@ export default class Category extends Component {
             brand_id: 0,
             currentNode: "",
             focusedRowKey: this.props.focusedRowKey,
-
-            treeData: []
         };
     }
 
@@ -45,15 +44,14 @@ export default class Category extends Component {
     }
 
     componentDidMount = async () => {
-        this.setState({ treeData: await this.getCategories() /*, focusedRowKey: this.props.focusedRowKey*/ });
-        //this.tree.current.instance.repaint();
+        store.setTreeSource(await this.getCategories());
     }
 
     render() {
         return (
             <TreeList
                 ref={this.tree}
-                dataSource={this.state.treeData}
+                dataSource={store.treeSource}
                 showBorders={false}
                 columnAutoWidth={true}
                 wordWrapEnabled={false}

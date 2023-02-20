@@ -3,9 +3,16 @@ import { action, observable } from 'mobx';
 class Store {
     @observable gridSource = [];
 
+    @observable treeSource = [];
+
+    @action setTreeSource = (data) => {
+        this.treeSource = [...data];
+    }
+
     @action setGridSource = (data) => {
         this.gridSource = [...data];
     }
+
     getUserInfo = async() => {
         const token = localStorage.getItem('token');
         if (token) {
