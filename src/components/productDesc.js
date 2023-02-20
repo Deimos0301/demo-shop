@@ -5,6 +5,7 @@ import 'devextreme/dist/css/dx.light.css';
 //import { Button } from "@blueprintjs/core";
 import { Button } from 'devextreme-react/button';
 import './Style/productDesc.css';
+import store from "../stores/ShopStore";
 
 class ProductDesc extends Component {
     constructor(props) {
@@ -25,6 +26,8 @@ class ProductDesc extends Component {
             const queryParameters = new URLSearchParams(window.location.search);
             this.product_id = queryParameters.get("product_id");
         }
+
+        this.userInfo = await store.getUserInfo();
 
         if (this.product_id) {
             const prod = await this.getProducts();
@@ -67,7 +70,8 @@ class ProductDesc extends Component {
             },
             body: JSON.stringify({
                 product_id: this.props.data.data.product_id,
-                quantity: this.state.quantity
+                quantity: this.state.quantity,
+                user_id: this.userInfo ? this.userInfo.user_id : undefined
             })
         });
     }
@@ -109,7 +113,7 @@ class ProductDesc extends Component {
         } = this.state.prod;
 
         return <div style={{ marginLeft: "10px", marginTop: "10px" }}>
-            <div className="full_name" style={{maxWidth: '800px'}}>{product_full_name}</div>
+            <div className="full_name" style={{ maxWidth: '800px' }}>{product_full_name}</div>
 
             <div style={{ display: "flex", flexDirection: "column" }}>
                 <div className="desc_row">
@@ -175,20 +179,20 @@ class ProductDesc extends Component {
                 Технические характеристики
             </div>
 
-            <div style={{maxWidth: "800px"}}>
-            <DataGrid
-                dataSource={this.state.desc}
-                showBorders={true}
-                keyExpr="attribute_id"
-                showColumnHeaders={false}
-                wordWrapEnabled={true}
-            >
-                <Grouping autoExpandAll={true} />
-                <Paging pageSize={100} />
-                <Column dataField="group_name" groupIndex={0} groupCellRender={this.renderGroup} />
-                <Column dataField="attr_name" alignment="left" />
-                <Column dataField="value" alignment="left" />
-            </DataGrid>
+            <div style={{ maxWidth: "800px" }}>
+                <DataGrid
+                    dataSource={this.state.desc}
+                    showBorders={true}
+                    keyExpr="attribute_id"
+                    showColumnHeaders={false}
+                    wordWrapEnabled={true}
+                >
+                    <Grouping autoExpandAll={true} />
+                    <Paging pageSize={100} />
+                    <Column dataField="group_name" groupIndex={0} groupCellRender={this.renderGroup} />
+                    <Column dataField="attr_name" alignment="left" />
+                    <Column dataField="value" alignment="left" />
+                </DataGrid>
             </div>
 
         </div>

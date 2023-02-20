@@ -5,6 +5,7 @@ import { Toast } from 'devextreme-react/toast';
 import { Button } from 'devextreme-react/button';
 import { Link } from 'react-router-dom';
 import TextBox from 'devextreme-react/text-box';
+import store from '../stores/ShopStore';
 
 import './Style/profile.css';
 
@@ -24,13 +25,16 @@ class Profile extends Component {
     componentDidMount = async () => {
         //localStorage.removeItem('token');
         const token = localStorage.getItem('token');
-        const user_id = localStorage.getItem('user_id');
-        const verify = await this.verifyToken(token);
 
-        if (verify.status === 'OK' && user_id) {
-            const info = await this.getUserInfo(user_id);
-            this.setState({ authenticated: true, userInfo: info });
-            //console.log(info)
+        if (token) {
+            const user_id = localStorage.getItem('user_id');
+            const verify = await this.verifyToken(token);
+
+            if (verify.status === 'OK' && user_id) {
+                const info = await store.getUserInfo(user_id);
+                this.setState({ authenticated: true, userInfo: info });
+                //console.log(info)
+            }
         }
         else
             this.showLoginForm();
@@ -94,9 +98,6 @@ class Profile extends Component {
             },
             body: JSON.stringify({ data: [this.state.userInfo] })
         });
-        // const li = await res.json();
-
-        // return li[0];
     }
 
     onLoginClick = async (e) => {
@@ -106,7 +107,7 @@ class Profile extends Component {
             this.hideLoginForm();
             localStorage.setItem('token', res.token);
             localStorage.setItem('user_id', res.user_id);
-            const info = await this.getUserInfo(res.user_id);
+            const info = await store.getUserInfo(res.user_id);
 
             if (this.props.setUserInfo)
                 this.props.setUserInfo(info);
@@ -186,7 +187,7 @@ class Profile extends Component {
     }
 
     onPasswordChanged = (data) => {
-        this.setState({password: data.value});
+        this.setState({ password: data.value });
     }
 
     onSaveProfile = async (e) => {
@@ -199,9 +200,9 @@ class Profile extends Component {
         let userInfo = { ...this.state.userInfo };
         for (let prop in userInfo) {
             if (userInfo.hasOwnProperty(prop) && prop !== 'login')
-                userInfo[prop] = typeof userInfo[prop] === 'number' ? 0 : "";
+                userInfo[prop] = undefined;
         }
-    
+
         if (this.props.setUserInfo)
             this.props.setUserInfo(userInfo);
 
@@ -251,7 +252,7 @@ class Profile extends Component {
                     </ToolbarItem> */}
 
                     <div className='profile_row'>
-                    <div className='profile_item'>
+                        <div className='profile_item'>
                             <div className='profile_label'>Пользователь:</div>
                             <TextBox text={this.state.userInfo.login} className="profile_input" placeholder='Телефон или email' onValueChanged={this.onLoginChanged} />
                         </div>
@@ -260,35 +261,6 @@ class Profile extends Component {
                             <TextBox text={this.state.password} className="profile_input" placeholder='Пароль' mode='password' onValueChanged={this.onPasswordChanged} />
                         </div>
                     </div>
-
-                    {/* <div className="dx-field">
-                        <div className="dx-field-label">Пользователь:</div>
-                        <div className="dx-field-value">
-                            <TextBox
-                                placeholder="Телефон или email"
-                                value={this.state.userInfo.login}
-                                onValueChanged={this.onLoginChanged}
-                            >
-                            </TextBox>
-                        </div>
-                    </div>
-
-                    <div className="dx-field">
-                        <div className="dx-field-label">Пароль:</div>
-                        <div className="dx-field-value">
-                            <TextBox
-                                placeholder="Пароль"
-                                mode="password"
-                                value={this.state.userInfo.password}
-                                onValueChanged={this.onPasswordChanged}
-                            >
-                            </TextBox>
-                        </div>
-                    </div> */}
-
-                    {/* <div className="dx-field" style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                <div>Забыли пароль?</div>
-            </div> */}
 
                     <div className="dx-field" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                         <div> <Link to="/signup" onClick={() => { this.hideLoginForm() }}> Регистрация  </Link> </div>
@@ -324,7 +296,6 @@ class Profile extends Component {
                         <TabPanel
                             height="100vh"
                             selectedIndex={0}
-                            // onOptionChanged={this.onSelectionChanged}
                             loop={false}
                             animationEnabled={true}
                             swipeEnabled={true}

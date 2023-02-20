@@ -6,12 +6,14 @@ import { React, Component } from 'react';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from './header';
 import './App.css';
-import Cart from './components/cart';
+import CartComp from './components/cartComp';
 import ProductDesc from './components/productDesc';
+import { observer } from 'mobx-react';
+import store from './stores/ShopStore';
 
 //set DANGEROUSLY_DISABLE_HOST_CHECK=true && 
 
-
+@observer
 class App extends Component {
     constructor(props) {
         super(props);
@@ -21,7 +23,6 @@ class App extends Component {
             password: '',
             authenticated: false,
             userInfo: {},
-            gridData: [],
             currentNode: "",
             gridRow: {}
         }
@@ -31,7 +32,7 @@ class App extends Component {
         // const token = localStorage.getItem('token');
 
         // if (token)
-            this.setState({ authenticated: true });
+        this.setState({ authenticated: true });
     }
 
     onChangePage = (idx) => {
@@ -64,7 +65,7 @@ class App extends Component {
     };
 
     setUserInfo = (info) => {
-        this.setState({userInfo: info});
+        this.setState({ userInfo: info });
     }
 
     getProducts = async (category_id, brand_id) => {
@@ -87,11 +88,11 @@ class App extends Component {
         //console.log(e.component.option('focusedRowKey'));
         let data = [];
 
-        if (rowData.brand_id !== null)
+        if (rowData.brand_id !== null) {
             data = await this.getProducts(rowData.category_id, rowData.brand_id);
-
+            store.setGridSource(data);
+        }
         this.setState({
-            gridData: data,
             currentNode: rowData.node_name,
             category_id: rowData.category_id,
             brand_id: rowData.brand_id
@@ -99,19 +100,19 @@ class App extends Component {
     }
 
     onGridFocusedRowChanged = (e) => {
-        this.setState({rowData: e.row.data});
+        this.setState({ rowData: e.row.data });
     }
 
     render() {
         return (
             <BrowserRouter>
                 <div className="App">
-                    <Header onFocusedRowChanged={this.onFocusedRowChanged}/>
+                    <Header onFocusedRowChanged={this.onFocusedRowChanged} userInfo={this.state.userInfo} />
 
                     <Routes>
                         <Route exact path='/' element={
-                            <Catalog 
-                                onFocusedRowChanged={this.onFocusedRowChanged} 
+                            <Catalog
+                                onFocusedRowChanged={this.onFocusedRowChanged}
                                 onGridFocusedRowChanged={this.onGridFocusedRowChanged}
                                 gridData={this.state.gridData}
                                 currentNode={this.state.currentNode}
@@ -119,9 +120,9 @@ class App extends Component {
                         />
                         <Route exact path='/auth' element={<Login onSubmitClick={this.onSubmitClick} />}></Route>
                         <Route exact path='/signup' element={<Signup />}></Route>
-                        <Route exact path='/profile' element={<Profile setUserInfo={this.setUserInfo}/>}></Route>
-                        <Route exact path='/basket' element={<Cart onSubmitClick={this.onSubmitClick} userInfo={this.state.userInfo}/>}></Route>
-                        <Route path='/product' element={<ProductDesc /*rowData={this.state.rowData}*//>} />
+                        <Route exact path='/profile' element={<Profile setUserInfo={this.setUserInfo} />}></Route>
+                        <Route exact path='/basket' element={<CartComp /*userInfo={this.state.userInfo}*/ />}></Route>
+                        <Route path='/product' element={<ProductDesc /*rowData={this.state.rowData}*/ />} />
                     </Routes>
                 </div>
             </BrowserRouter>

@@ -23,7 +23,7 @@ class Catalog extends Component {
                         onFocusedRowChanged={this.props.onFocusedRowChanged}
                         // focusedRowKey={this.state.focusedRowKey}
                         renderCell={this.renderCell}
-                        />
+                    />
                 </div>
 
                 <div className="product_list">

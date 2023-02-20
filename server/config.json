@@ -5,10 +5,10 @@
         "password": "fnohxr5K"
     },
     "pg": {
-        "host": "s48-svn",
+        "host": "s48.mxhome.ru",
         "database":"3logic",
         "user":"sa",
-        "password":"sa",
+        "password":"sa2008_s48",
         "port": 5432
     }
 }

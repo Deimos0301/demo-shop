@@ -1,4 +1,7 @@
 .cart-wrap {
+    display: flex;
+    flex-direction: column;
+    line-height: 30px;
     max-width: 900px;
 }
 

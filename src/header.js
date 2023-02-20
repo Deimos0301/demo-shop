@@ -4,6 +4,7 @@ import { HashLink } from 'react-router-hash-link';
 import { Button } from 'devextreme-react/button';
 import { Link } from 'react-router-dom';
 import { Popover } from 'devextreme-react/popover';
+import store from "./stores/ShopStore";
 import "devextreme/dist/css/dx.light.css";
 import "devextreme/dist/css/dx.common.css";
 
@@ -20,7 +21,8 @@ class Header extends Component {
             hintProfileVisible: false,
             hintBasketVisible: false,
             login: "",
-            password: ""
+            password: "",
+            userInfo: {}
         }
     }
 
@@ -32,7 +34,26 @@ class Header extends Component {
         this.setState({ hintBasketVisible: !this.state.hintBasketVisible });
     }
 
+    componentDidMount = async () => {
+        let { user_id } = this.props.userInfo;
+
+        if (user_id) {
+            this.setState({ userInfo: this.props.userInfo });
+        } else {
+            const info = await store.getUserInfo();
+            this.setState({ userInfo: info });
+        }
+    }
     render() {
+        let fullName = "";
+
+        if (this.state.userInfo) {
+            let { first_name, last_name } = this.state.userInfo;
+            last_name = last_name || "";
+            first_name = first_name || "";
+            fullName = last_name + ' ' + first_name;
+        }
+
         return (
             <>
                 <div className='header'>
@@ -59,10 +80,12 @@ class Header extends Component {
                     </div>
 
                     <HashLink smooth to="/#top" className='logo'>
-                        <img src={logo} style={{color: 'black'}}></img>
+                        <img src={logo} style={{ color: 'black' }} alt="logo"></img>
+
                     </HashLink>
 
                     <div style={{ flexGrow: "6" }}></div>
+                    <div className="user-fullname">{fullName}</div>
 
                     <div className="head_tools">
                         <Link to="/profile" style={{ textDecoration: "none" }} onMouseEnter={this.toggleHintProfile} onMouseLeave={this.toggleHintProfile} >

@@ -71,22 +71,9 @@ class SideBar extends Component {
     render() {
         return (
             <Burger right={false} width={this.props.width} isOpen={this.state.isOpen} onOpen={this.handleIsOpen} onClose={this.handleIsOpen} outerContainerId="header">
-                <div style={{color: 'maroon', fontSize: "20px", fontWeight: "600", lineHeight: "40px", textDecoration: "none"}}>
+                <div style={{ color: 'maroon', fontSize: "20px", fontWeight: "600", lineHeight: "40px", textDecoration: "none" }}>
                     <div> <Link to="/profile" style={{color: "#aec5d8"}}>Личный кабинет</Link></div>
                     <div> <Link to="/basket" style={{color: "#aec5d8"}}>Корзина</Link></div>
-
-                    {/* <div className="list-container">
-                        <List
-                            dataSource={this.state.listSource}
-                            height="100%"
-                            grouped={true}
-                            collapsibleGroups={true}
-                            displayExpr="name"
-                            // grouped={false}
-                            groupRender={GroupTemplate}
-                        />
-                    </div> */}
-
                     <div style={{color: "#ff9999"}}>Каталог:</div>
 
                     <div className="dx-swatch-moon" style={{height: "500px"}}>
@@ -94,17 +81,6 @@ class SideBar extends Component {
                             onFocusedRowChanged={this.props.onFocusedRowChanged}
                         />
                     </div>
-
-
-                    {/* <Menu
-                        dataSource={this.state.treeSource}
-                        displayExpr="name"
-                        showFirstSubmenuMode="onHover"
-                        orientation="horizontal"
-                        hideSubmenuOnMouseLeave={true}
-                        onItemClick={this.itemClick}
-                    >
-                    </Menu> */}
                 </div>
             </Burger>
         );

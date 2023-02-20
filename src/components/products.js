@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import ruMessages from "devextreme/localization/messages/ru.json";
 import { locale, loadMessages } from "devextreme/localization";
 import ProductDesc from "./productDesc";
+import store from "../stores/ShopStore";
 
 import 'devextreme/dist/css/dx.light.css';
 import './Style/catalog.css';
@@ -66,7 +67,7 @@ class Products extends Component {
             <div className="prod_grid">
                
                 <DataGrid
-                    dataSource={this.props.dataSource}
+                    dataSource={store.gridSource}
                     showBorders={true}
                     columnAutoWidth={true}
                     wordWrapEnabled={true}
