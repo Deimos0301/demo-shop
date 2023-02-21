@@ -1,10 +1,16 @@
-import { action, observable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
 
 class Store {
+    constructor() {
+        makeObservable(this);
+    }
+
     @observable gridSource = [];
 
     @observable treeSource = [];
 
+    @observable currentNode = '';
+    @observable userInfo = {};
     @action setTreeSource = (data) => {
         this.treeSource = [...data];
     }
@@ -13,7 +19,15 @@ class Store {
         this.gridSource = [...data];
     }
 
-    getUserInfo = async() => {
+    @action setCurrentNode = (data) => {
+        this.currentNode = data;
+    }
+
+    @action setUserInfo = (info) => {
+        this.userInfo = { ...info };
+    }
+
+    getUserInfoByToken = async () => {
         const token = localStorage.getItem('token');
         if (token) {
             const arr = await fetch('/api/getUserInfoByToken', {
@@ -23,12 +37,12 @@ class Store {
                 },
                 body: JSON.stringify({ token: token })
             });
-    
+
             const res = await arr.json();
-    
+
             return res[0];
         }
-    
+
         return undefined;
     }
 }

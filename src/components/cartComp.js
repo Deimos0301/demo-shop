@@ -20,8 +20,6 @@ class CartComp extends Component {
     constructor(props) {
         super(props);
 
-        this.userInfo = {};
-
         this.state = {
             total: 0, // Сумма к оплате
             basketData: [] // Массив, содержащий данные корзины:
@@ -44,10 +42,9 @@ class CartComp extends Component {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ user_id: this.userInfo.user_id })
+            body: JSON.stringify({ user_id: store.userInfo.user_id })
         });
         return await arr.json();
-        console.log(await arr.json());
     }
 
     getSmallImage = (e) => {
@@ -81,9 +78,7 @@ class CartComp extends Component {
     }
 
     componentDidMount = async () => {
-        const tmp = await store.getUserInfo();
-        if (tmp)
-            this.userInfo = tmp;
+        await store.getUserInfoByToken();
         // Получаем с сервера данные корзины
         const arr = await this.getBasket();
         

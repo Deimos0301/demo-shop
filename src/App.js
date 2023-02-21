@@ -22,17 +22,9 @@ class App extends Component {
             login: '',
             password: '',
             authenticated: false,
-            userInfo: {},
-            currentNode: "",
+            // currentNode: "",
             gridRow: {}
         }
-    }
-
-    componentDidMount = () => {
-        // const token = localStorage.getItem('token');
-
-        // if (token)
-        this.setState({ authenticated: true });
     }
 
     onChangePage = (idx) => {
@@ -49,23 +41,6 @@ class App extends Component {
         });
         const li = await res.json();
         return li;
-    }
-
-    onSubmitClick = (e, login, password) => {
-        //e.preventDefault();
-        this.getAuth(login, password)
-            .then((res) => {
-                if (res.token) {
-                    localStorage.setItem('token', res.token);
-                    this.setState({ authenticated: true });
-                } else {
-                    this.setState({ authenticated: false });
-                }
-            });
-    };
-
-    setUserInfo = (info) => {
-        this.setState({ userInfo: info });
     }
 
     getProducts = async (category_id, brand_id) => {
@@ -91,9 +66,12 @@ class App extends Component {
         if (rowData.brand_id !== null) {
             data = await this.getProducts(rowData.category_id, rowData.brand_id);
             store.setGridSource(data);
+            store.setCurrentNode(rowData.node_name);
         }
+
+        
         this.setState({
-            currentNode: rowData.node_name,
+            // currentNode: rowData.node_name,
             category_id: rowData.category_id,
             brand_id: rowData.brand_id
         });
@@ -107,21 +85,20 @@ class App extends Component {
         return (
             <BrowserRouter>
                 <div className="App">
-                    <Header onFocusedRowChanged={this.onFocusedRowChanged} userInfo={this.state.userInfo} />
+                    <Header onFocusedRowChanged={this.onFocusedRowChanged} />
 
                     <Routes>
                         <Route exact path='/' element={
                             <Catalog
                                 onFocusedRowChanged={this.onFocusedRowChanged}
                                 onGridFocusedRowChanged={this.onGridFocusedRowChanged}
-                                gridData={this.state.gridData}
-                                currentNode={this.state.currentNode}
+                                currentNode={store.currentNode}
                             />}
                         />
                         <Route exact path='/auth' element={<Login onSubmitClick={this.onSubmitClick} />}></Route>
                         <Route exact path='/signup' element={<Signup />}></Route>
-                        <Route exact path='/profile' element={<Profile setUserInfo={this.setUserInfo} />}></Route>
-                        <Route exact path='/basket' element={<CartComp /*userInfo={this.state.userInfo}*/ />}></Route>
+                        <Route exact path='/profile' element={<Profile />}></Route>
+                        <Route exact path='/basket' element={<CartComp  />}></Route>
                         <Route path='/product' element={<ProductDesc /*rowData={this.state.rowData}*/ />} />
                     </Routes>
                 </div>

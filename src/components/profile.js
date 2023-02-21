@@ -6,9 +6,12 @@ import { Button } from 'devextreme-react/button';
 import { Link } from 'react-router-dom';
 import TextBox from 'devextreme-react/text-box';
 import store from '../stores/ShopStore';
+import { observer } from 'mobx-react';
+//import {makeObservable} from 'mobx';
 
 import './Style/profile.css';
 
+@observer
 class Profile extends Component {
     constructor(props) {
         super(props);
@@ -17,8 +20,7 @@ class Profile extends Component {
             authenticated: false,
             formVisible: false,
             errorVisible: false,
-            password: "",
-            userInfo: {}
+            password: ""
         }
     }
 
@@ -31,8 +33,8 @@ class Profile extends Component {
             const verify = await this.verifyToken(token);
 
             if (verify.status === 'OK' && user_id) {
-                const info = await store.getUserInfo(user_id);
-                this.setState({ authenticated: true, userInfo: info });
+                await store.getUserInfo(user_id);
+                this.setState({ authenticated: true });
                 //console.log(info)
             }
         }
@@ -42,19 +44,15 @@ class Profile extends Component {
     }
 
     showLoginForm = () => {
-        this.setState({
-            formVisible: true
-        });
+        this.setState( {formVisible: true} );
     }
 
     hideLoginForm = () => {
-        this.setState({
-            formVisible: false
-        });
+        this.setState( {formVisible: false} );
     }
 
     getAuth = async () => {
-        const { login } = this.state.userInfo;
+        const { login } = store.userInfo;
         const res = await fetch('/api/getAuth', {
             method: 'POST',
             headers: {
@@ -77,26 +75,13 @@ class Profile extends Component {
         return await res.json();
     }
 
-    getUserInfo = async (user_id) => {
-        const res = await fetch('/api/getUserInfo', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ user_id: user_id })
-        });
-        const li = await res.json();
-
-        return li[0];
-    }
-
     usersUpdate = async () => {
         await fetch('/api/usersUpdate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ data: [this.state.userInfo] })
+            body: JSON.stringify({ data: [store.userInfo] })
         });
     }
 
@@ -107,12 +92,10 @@ class Profile extends Component {
             this.hideLoginForm();
             localStorage.setItem('token', res.token);
             localStorage.setItem('user_id', res.user_id);
-            const info = await store.getUserInfo(res.user_id);
 
-            if (this.props.setUserInfo)
-                this.props.setUserInfo(info);
+            await store.getUserInfoByToken();
 
-            this.setState({ authenticated: true, errorVisible: false, formVisible: false, userInfo: info });
+            this.setState({ authenticated: true, errorVisible: false, formVisible: false });
         } else {
             this.setState({ authenticated: false, errorVisible: true });
         }
@@ -123,67 +106,35 @@ class Profile extends Component {
     }
 
     onLoginChanged = (data) => {
-        this.setState(prevState => {
-            let userInfo = { ...prevState.userInfo };
-            userInfo.login = data.value;
-            return { userInfo };
-        });
+        store.userInfo.login = data.value;
     }
 
     onFirstNameChanged = (data) => {
-        this.setState(prevState => {
-            let userInfo = { ...prevState.userInfo };
-            userInfo.first_name = data.value;
-            return { userInfo };
-        });
+        store.userInfo.first_name = data.value;
     }
 
     onLastNameChanged = (data) => {
-        this.setState(prevState => {
-            let userInfo = { ...prevState.userInfo };
-            userInfo.last_name = data.value;
-            return { userInfo };
-        });
+        store.userInfo.last_name = data.value;
     }
 
     onMiddleNameChanged = (data) => {
-        this.setState(prevState => {
-            let userInfo = { ...prevState.userInfo };
-            userInfo.middle_name = data.value;
-            return { userInfo };
-        });
+        store.userInfo.middle_name = data.value;
     }
 
     onEmailChanged = (data) => {
-        this.setState(prevState => {
-            let userInfo = { ...prevState.userInfo };
-            userInfo.email = data.value;
-            return { userInfo };
-        });
+        store.userInfo.email = data.value;
     }
 
     onPhoneChanged = (data) => {
-        this.setState(prevState => {
-            let userInfo = { ...prevState.userInfo };
-            userInfo.phone = data.value;
-            return { userInfo };
-        });
+        store.userInfo.phone = data.value;
     }
 
     onCityChanged = (data) => {
-        this.setState(prevState => {
-            let userInfo = { ...prevState.userInfo };
-            userInfo.city = data.value;
-            return { userInfo };
-        });
+        store.userInfo.city = data.value;
     }
 
     onAddressChanged = (data) => {
-        this.setState(prevState => {
-            let userInfo = { ...prevState.userInfo };
-            userInfo.address = data.value;
-            return { userInfo };
-        });
+        store.userInfo.address = data.value;
     }
 
     onPasswordChanged = (data) => {
@@ -197,16 +148,16 @@ class Profile extends Component {
     onExit = (e) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user_id');
-        let userInfo = { ...this.state.userInfo };
+
+        let userInfo = { ...store.userInfo };
         for (let prop in userInfo) {
             if (userInfo.hasOwnProperty(prop) && prop !== 'login')
                 userInfo[prop] = undefined;
         }
 
-        if (this.props.setUserInfo)
-            this.props.setUserInfo(userInfo);
+        store.setUserInfo(userInfo);
 
-        this.setState({ authenticated: false, userInfo: userInfo, formVisible: true });
+        this.setState({ authenticated: false, formVisible: true });
     }
 
     titleRenderer = (data) => {
@@ -254,7 +205,7 @@ class Profile extends Component {
                     <div className='profile_row'>
                         <div className='profile_item'>
                             <div className='profile_label'>Пользователь:</div>
-                            <TextBox text={this.state.userInfo.login} className="profile_input" placeholder='Телефон или email' onValueChanged={this.onLoginChanged} />
+                            <TextBox text={store.userInfo.login} className="profile_input" placeholder='Телефон или email' onValueChanged={this.onLoginChanged}/>
                         </div>
                         <div className='profile_item'>
                             <div className='profile_label'>Пароль:</div>
@@ -305,42 +256,42 @@ class Profile extends Component {
                                     <div className='profile_row'>
                                         <div className='profile_item'>
                                             <div className='profile_label'>Логин:</div>
-                                            <TextBox text={this.state.userInfo.login} className="profile_input" onValueChanged={this.onLoginChanged} />
+                                            <TextBox text={store.userInfo.login} className="profile_input" onValueChanged={this.onLoginChanged} />
                                         </div>
 
                                         <div className='profile_item'>
                                             <div className='profile_label'>Фамилия:</div>
-                                            <TextBox text={this.state.userInfo.last_name} className="profile_input" onValueChanged={this.onLastNameChanged} />
+                                            <TextBox text={store.userInfo.last_name} className="profile_input" onValueChanged={this.onLastNameChanged}/>
                                         </div>
 
                                         <div className='profile_item'>
                                             <div className='profile_label'>Имя:</div>
-                                            <TextBox text={this.state.userInfo.first_name} className="profile_input" onValueChanged={this.onFirstNameChanged} />
+                                            <TextBox text={store.userInfo.first_name} className="profile_input" onValueChanged={this.onFirstNameChanged}/>
                                         </div>
 
                                         <div className='profile_item'>
                                             <div className='profile_label'>Отчество:</div>
-                                            <TextBox value={this.state.userInfo.middle_name} className="profile_input" onValueChanged={this.onMiddleNameChanged} />
+                                            <TextBox value={store.userInfo.middle_name} className="profile_input" onValueChanged={this.onMiddleNameChanged}/>
                                         </div>
 
                                         <div className='profile_item'>
                                             <div className='profile_label'>Email:</div>
-                                            <TextBox text={this.state.userInfo.email} mode="email" className="profile_input" onValueChanged={this.onEmailChanged} />
+                                            <TextBox text={store.userInfo.email} mode="email" className="profile_input" onValueChanged={this.onEmailChanged} />
                                         </div>
 
                                         <div className='profile_item'>
                                             <div className='profile_label'>Телефон:</div>
-                                            <TextBox text={this.state.userInfo.phone} className="profile_input" mode="tel" onValueChanged={this.onPhoneChanged} />
+                                            <TextBox text={store.userInfo.phone} className="profile_input" mode="tel" onValueChanged={this.onPhoneChanged} />
                                         </div>
 
                                         <div className='profile_item'>
                                             <div className='profile_label'>Город:</div>
-                                            <TextBox text={this.state.userInfo.city} className="profile_input" onValueChanged={this.onCityChanged} />
+                                            <TextBox text={store.userInfo.city} className="profile_input" onValueChanged={this.onCityChanged} />
                                         </div>
 
                                         <div className='profile_item'>
                                             <div className='profile_label'>Адрес:</div>
-                                            <TextBox text={this.state.userInfo.address} className="profile_input" onValueChanged={this.onAddressChanged} />
+                                            <TextBox text={store.userInfo.address} className="profile_input" onValueChanged={this.onAddressChanged} />
                                         </div>
 
                                         <div className='profile_item' style={{ marginTop: "20px", marginLeft: "10px" }}>

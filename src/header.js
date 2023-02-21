@@ -7,10 +7,11 @@ import { Popover } from 'devextreme-react/popover';
 import store from "./stores/ShopStore";
 import "devextreme/dist/css/dx.light.css";
 import "devextreme/dist/css/dx.common.css";
-
+import { observer } from 'mobx-react';
 import SideBar from "./sidebar";
 import './header.css';
 
+@observer
 class Header extends Component {
     constructor(props) {
         super(props);
@@ -21,8 +22,7 @@ class Header extends Component {
             hintProfileVisible: false,
             hintBasketVisible: false,
             login: "",
-            password: "",
-            userInfo: {}
+            password: ""
         }
     }
 
@@ -35,20 +35,15 @@ class Header extends Component {
     }
 
     componentDidMount = async () => {
-        let { user_id } = this.props.userInfo;
-
-        if (user_id) {
-            this.setState({ userInfo: this.props.userInfo });
-        } else {
-            const info = await store.getUserInfo();
-            this.setState({ userInfo: info });
-        }
+        await store.getUserInfoByToken();
     }
+
     render() {
         let fullName = "";
+        //console.log(store.userInfo)
 
-        if (this.state.userInfo) {
-            let { first_name, last_name } = this.state.userInfo;
+        if (store.userInfo) {
+            let { first_name, last_name } = store.userInfo;
             last_name = last_name || "";
             first_name = first_name || "";
             fullName = last_name + ' ' + first_name;
@@ -87,12 +82,12 @@ class Header extends Component {
                     <div className="user-fullname">{fullName}</div>
 
                     <div className="head_tools">
-                        <Link to="/profile" style={{ textDecoration: "none" }} onMouseEnter={this.toggleHintProfile} onMouseLeave={this.toggleHintProfile} >
+                        <Link to="/profile" style={{ textDecoration: "none" }}  >
                             <Button text="" id="profile" type="success" icon="user" stylingMode="outlined" />
                         </Link>
                     </div>
                     <div className="head_tools">
-                        <Link to="/basket" style={{ textDecoration: "none" }} onMouseEnter={this.toggleHintBasket} onMouseLeave={this.toggleHintBasket}>
+                        <Link to="/basket" style={{ textDecoration: "none" }} /*onMouseEnter={this.toggleHintBasket} onMouseLeave={this.toggleHintBasket}*/ >
                             <Button text="" id="basket" type="success" icon="cart" stylingMode="outlined" />
                         </Link>
                     </div>
