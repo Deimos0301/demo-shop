@@ -81,12 +81,15 @@ app.post('/api/verifyToken', urlencodedParser, async (req, res) => {
 app.post('/api/getAuth', urlencodedParser, async (req, res) => {
     const rows = await pool.query('select * from "getUserInfo"($1, $2, $3)', [req.body.user_id, req.body.login, req.body.password]);
     if (rows.rows && rows.rows.length > 0) {
+        const token = jwt.sign({ user_id: rows.rows[0].user_id}, tokenKey, {expiresIn: '1h'});
+
+        await pool.query('insert into public.token ("token", user_id) values ($1, $2)', [token, rows.rows[0].user_id]);
         
         return res.status(200).json({
             user_id: rows.rows[0].user_id,
             login: rows.rows[0].login,
             
-            token: jwt.sign({ user_id: rows.rows[0].user_id}, tokenKey, {expiresIn: '1h'})
+            token: token
           });
     }
 
@@ -95,6 +98,12 @@ app.post('/api/getAuth', urlencodedParser, async (req, res) => {
 
 app.post('/api/getUserInfo', urlencodedParser, async (req, res) => {
     const rows = await pool.query('select * from "getUserInfo"($1, $2, $3)', [req.body.user_id, req.body.login, req.body.password]);
+
+    return res.json(rows.rows);
+});
+
+app.post('/api/getUserInfoByToken', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select * from "getUserInfoByToken"($1)', [req.body.token]);
 
     return res.json(rows.rows);
 });
@@ -197,7 +206,7 @@ app.post('/api/basketInsert', urlencodedParser, async (req, res) => {
     const host = req.ip.split(':')[3];
 
     //console.log(host, req.body)
-    await pool.query('call public."BasketInsert"($1, $2, $3)', [host, req.body.product_id, req.body.quantity]);
+    await pool.query('call public."BasketInsert"($1, $2, $3, $4)', [host, req.body.product_id, req.body.quantity, req.body.user_id]);
 
     res.end("done");
 });
