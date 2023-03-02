@@ -83,7 +83,7 @@ class Products extends Component {
                     <StateStoring enabled={true} type="localStorage" storageKey="prod_grid" />
 
                     <Toolbar>
-                        <Item location="before"><div className="currentNode">{this.props.currentNode}</div></Item>
+                        <Item location="before"><div className="currentNode">{store.currentNode}</div></Item>
 
                         <Item name="searchPanel" />
                     </Toolbar>

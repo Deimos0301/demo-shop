@@ -1,8 +1,13 @@
+.cart-superwrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .cart-wrap {
     display: flex;
     flex-direction: column;
     line-height: 30px;
-    max-width: 900px;
 }
 
 .cart-list {

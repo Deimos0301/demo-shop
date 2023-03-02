@@ -5,8 +5,11 @@ const { pool } = require('./sqldb');
 const soap = require('soap');
 const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 //const crypto = require('crypto');
 const fs = require('fs');
+const url = require('url');
+const util = require('util');
 
 const app = express();
 
@@ -68,32 +71,39 @@ app.post('/api/verifyToken', urlencodedParser, async (req, res) => {
 
     try {
         r = await verifyToken(req.body.token);
-    } catch(e) {
+    } catch (e) {
         msg = e;
     }
 
     if (r === true)
-        res.status(200).json({status: 'OK', message: msg});
+        res.status(200).json({ status: 'OK', message: msg });
     else
         res.status(511).json({ status: 'FAIL', message: 'Token expired!' });
 });
 
 app.post('/api/getAuth', urlencodedParser, async (req, res) => {
-    const rows = await pool.query('select * from "getUserInfo"($1, $2, $3)', [req.body.user_id, req.body.login, req.body.password]);
-    if (rows.rows && rows.rows.length > 0) {
-        const token = jwt.sign({ user_id: rows.rows[0].user_id}, tokenKey, {expiresIn: '1h'});
+    const r = await pool.query('select "getTokenByLogin"($1)', [req.body.login]);
+    let token;
+    if (r.rows)
+        token = r.rows[0].getTokenByLogin;
 
-        await pool.query('insert into public.token ("token", user_id) values ($1, $2)', [token, rows.rows[0].user_id]);
-        
+    const rows = await pool.query('select * from "getUserInfo"($1, $2, $3) where IsActive = true', [req.body.user_id, req.body.login, req.body.password]);
+    if (rows.rows && rows.rows.length > 0) {
+        if (!token)
+            token = jwt.sign({ user_id: rows.rows[0].user_id }, tokenKey, { expiresIn: '12h' });
+
+        let D = new Date();
+
+        await pool.query('call "tokenInsert"($1, $2, $3)', [token, rows.rows[0].user_id, D.addHours(12)]);
+
         return res.status(200).json({
             user_id: rows.rows[0].user_id,
             login: rows.rows[0].login,
-            
             token: token
-          });
+        });
     }
 
-    return res.status(404).json({ message: 'Invalid username or password!' });
+    return res.status(511).json({ message: 'Invalid username or password!' });
 })
 
 app.post('/api/getUserInfo', urlencodedParser, async (req, res) => {
@@ -110,6 +120,55 @@ app.post('/api/getUserInfoByToken', urlencodedParser, async (req, res) => {
 
 app.post('/api/usersUpdate', urlencodedParser, async (req, res) => {
     await pool.query('call "usersUpdate"($1)', [JSON.stringify(req.body.data)]);
+
+    res.end("done");
+});
+
+app.post('/api/checkUserExists', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select * from "checkUser"($1)', [req.body.data]);
+
+    return res.json(rows.rows);
+});
+
+app.post('/api/usersInsert', urlencodedParser, async (req, res, next) => {
+    if (typeof req.body.data === 'string')
+        req.body.data = JSON.parse(req.body.data);
+
+    const pa = url.parse(req.body.origin);
+
+    const origin = pa.protocol + '//' + pa.hostname + ':' + config.port + '/api/confirm?token=';
+    const email = req.body.data.email;
+
+    req.body.data = [req.body.data];
+
+    try {
+        const ch = await pool.query('select * from "checkUser"($1)', [req.body.data[0].login]);
+        //console.log(req.body.data)
+        if (ch.rows.length > 0)
+            throw new Error('Учетная запись с такими параметрами уже существует!');
+        const rows = await pool.query('select * from "usersInsert"($1)', [JSON.stringify(req.body.data)]);
+        const token = jwt.sign({ user_id: rows.rows[0].user_id }, tokenKey, { expiresIn: '12h' });
+
+        let D = new Date();
+        await pool.query('call "tokenInsert"($1, $2, $3)', [token, rows.rows[0].user_id, D.addHours(12)]);
+        await sendMail(email, "Для подтверждения регистрации перейдите по следующей ссылке:<br/> " + origin + token);
+
+        res.status(200).send({message: "На указанный Email выслано сообщение о подтверждении регистрации"});
+    }
+    catch (e) {
+        res.status(531).send({message: e.message});        
+    }
+});
+
+app.get('/api/confirm*', urlencodedParser, async (req, res) => {
+    const token = req.query.token;
+    await pool.query('update users set IsActive = true where User_ID = (select User_ID from Token t where t.token = $1)', [token]);
+    const rows = await pool.query('select * from "getUserInfoByToken"($1) where IsActive = true', [token]);
+    res.status(200).send( rows.rows.length > 0 ? 'Учетная запись подтверждена!' : 'Ошибка при подтверждении!');
+});
+
+app.post('/api/userChangePassword', urlencodedParser, async (req, res) => {
+    await pool.query('call "userChangePassword"($1, $2)', [req.body.user_id, req.body.password]);
 
     res.end("done");
 });
@@ -533,6 +592,41 @@ load3Logic = async (enabledCategories) => {
     //console.log(categoryArr.length);
 }
 
+Date.prototype.addHours = function (h) {
+    this.setTime(this.getTime() +
+        (h * 60 * 60 * 1000));
+    return this;
+}
+
+
+const sendMail = async (to, content) => {
+    //    let testEmailAccount = await nodemailer.createTestAccount();
+
+    let transporter = nodemailer.createTransport({
+        host: config.mail.smtp,
+        port: config.mail.port,
+        secure: true,
+        auth: {
+            user: config.mail.user,
+            pass: config.mail.pass,
+        },
+    });
+
+
+    let result = await transporter.sendMail({
+        from: '"Demo-Shop" <webmaster@mxhome.ru>',
+        to: to,
+        subject: 'Authorization confirm',
+        text: '',
+        html: content
+        //'This <i>message</i> was sent from <strong>Node js</strong> server.',
+    });
+
+    //console.log(result);
+};
+
+
+//sendMail('holopov@inform48.ru', 'Раз-два-три');
 //load3Logic([71, 56, 113, 237, 69]);
 
 app.listen(config.port);

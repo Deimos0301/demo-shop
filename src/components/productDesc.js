@@ -1,10 +1,12 @@
 import { React, Component } from "react";
 import { DataGrid, Column, Grouping, Paging } from 'devextreme-react/data-grid';
 import { NumberBox } from 'devextreme-react/number-box';
+import Gallery from 'devextreme-react/gallery';
 import 'devextreme/dist/css/dx.light.css';
 //import { Button } from "@blueprintjs/core";
 import { Button } from 'devextreme-react/button';
 import './Style/productDesc.css';
+import '../App.css';
 import store from "../stores/ShopStore";
 
 class ProductDesc extends Component {
@@ -27,7 +29,7 @@ class ProductDesc extends Component {
             this.product_id = queryParameters.get("product_id");
         }
 
-        this.userInfo = await store.getUserInfo();
+        await store.getUserInfoByToken();
 
         if (this.product_id) {
             const prod = await this.getProducts();
@@ -71,9 +73,15 @@ class ProductDesc extends Component {
             body: JSON.stringify({
                 product_id: this.props.data.data.product_id,
                 quantity: this.state.quantity,
-                user_id: this.userInfo ? this.userInfo.user_id : undefined
+                user_id: store.userInfo ? store.userInfo.user_id : undefined
             })
         });
+
+        const arr = await store.getBasket();
+        store.setBasketData(arr);
+        // Добавить элемент в store.basketData
+
+        //store.setBasketCounter(store.basketCounter );
     }
 
     renderGroup = (data) => {
@@ -109,50 +117,68 @@ class ProductDesc extends Component {
             product_warranty,
             product_remain_text,
             image_prefix,
-            product_image_main
+            product_image_main,
+            product_image_additional,
         } = this.state.prod;
 
-        return <div style={{ marginLeft: "10px", marginTop: "10px" }}>
-            <div className="full_name" style={{ maxWidth: '800px' }}>{product_full_name}</div>
+        let images = [image_prefix + product_image_main];
 
-            <div style={{ display: "flex", flexDirection: "column" }}>
-                <div className="desc_row">
-                    <div className="desc_head">Бренд:</div>
-                    <div className="desc_value">{brand_name}</div>
+        if (product_image_additional) {
+            let arr = product_image_additional.split(',');
+            arr.map(item => images.push(image_prefix + item));
+        }
+
+        return <div className="prod-superwrap" style={{ alignItems: `${window.location.pathname === '/catalog' ? 'flex-start' : 'center'}` }}>
+            <div className="prod-wrap">
+                <div className="photo-desc">
+
+                    <div className="wrap_photo" style={{ display: "flex" }}>
+                        {/* <div className="prod_photo" style={{ backgroundImage: `url(${image_prefix + product_image_main})` }} /> */}
+                        <div className="prod_photo"> 
+                            <Gallery 
+                                dataSource={images}
+                                showNavButtons={true}
+                            >
+                            </Gallery> </div>
                 </div>
 
-                <div className="desc_row">
-                    <div className="desc_head">Артикул:</div>
-                    <div className="desc_value">{product_articul}</div>
-                </div>
+                    <div className="prod-desc">
+                        <div className="product_full_name" >{product_full_name}</div>
 
-                <div className="desc_row">
-                    <div className="desc_head">УИН:</div>
-                    <div className="desc_value">{product_partnumber}</div>
-                </div>
+                        <div style={{ display: "flex", flexDirection: "column", flexGrow: "3" }}>
+                            <table style={{maxWidth: "400px"}}>
+                                <tr>
+                                    <td className="desc_head"> Бренд: </td>
+                                    <td className="desc_value"> {brand_name} </td>
+                                </tr>
+                                <tr>
+                                    <td className="desc_head"> Артикул: </td>
+                                    <td className="desc_value"> {product_articul} </td>
+                                </tr>
+                                <tr>
+                                    <td className="desc_head"> УИН: </td>
+                                    <td className="desc_value"> {product_partnumber} </td>
+                                </tr>
+                                <tr>
+                                    <td className="desc_head"> Категория: </td>
+                                    <td className="desc_value"> {category_name} </td>
+                                </tr>
+                                <tr>
+                                    <td className="desc_head"> Гарантия: </td>
+                                    <td className="desc_value"> {product_warranty} мес. </td>
+                                </tr>
+                                <tr>
+                                    <td className="desc_head"> Наличие на складе: </td>
+                                    <td className="desc_value"> {product_remain_text} </td>
+                                </tr>
+                            </table>
 
-                <div className="desc_row">
-                    <div className="desc_head">Категория:</div>
-                    <div className="desc_value">{category_name}</div>
-                </div>
+                            <div style={{ flexGrow: "3" }}></div>
 
-                <div className="desc_row">
-                    <div className="desc_head">Гарантия:</div>
-                    <div className="desc_value">{product_warranty} мес.</div>
-                </div>
+                            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", width: "100%", alignItems: "center", marginTop: "10px", marginBottom: "20px" }}>
+                                <div className="price" style={{ fontSize: "20px", fontWeight: 500, flexGrow: 1 }}>Цена: {product_price_retail_rub ? formatter.format(product_price_retail_rub.toFixed(0)) : 0}</div>
 
-                <div className="desc_row">
-                    <div className="desc_head">Наличие на складе:</div>
-                    <div className="desc_value">{product_remain_text}</div>
-                </div>
-
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px", marginBottom: "20px", maxWidth: '800px' }}>
-                <div className="price" style={{ fontSize: "20px", fontWeight: 500 }}>Цена: {product_price_retail_rub ? formatter.format(product_price_retail_rub.toFixed(0)) : 0}</div>
-                <div style={{ flexGrow: 6 }}></div>
-
-                <div style={{ display: "flex", marginLeft: "5px", justifyContent: "center", alignItems: "center" /*height: "28px"*/ }}>
+                                <div style={{ display: "flex", marginLeft: "5px", justifyContent: "center", alignItems: "center" }}>
                     <div><Button icon="minus" onClick={this.onMinusClick} disabled={this.state.minusDisabled} /></div>
 
                     <NumberBox
@@ -166,20 +192,21 @@ class ProductDesc extends Component {
                     <div><Button icon="plus" onClick={this.onPlusClick} /></div>
                 </div>
 
-                <div style={{ display: "flex", marginLeft: "5px", marginRight: "10px" /*height: "28px"*/ }}>
-                    <Button text="В корзину" type="success" icon="add" stylingMode="contained" onClick={this.basketInsert}>  </Button>
+                                <div style={{ display: "flex", marginLeft: "5px", marginRight: "0px" }}>
+                                    <Button text="В корзину" type="success" icon="arrowright" stylingMode="contained" onClick={this.basketInsert} />
                 </div>
             </div>
-
-            <div className="wrap_photo" style={{ display: "flex" }}>
-                <div className="prod_photo" style={{ backgroundImage: `url(${image_prefix + product_image_main})` }} />
+                        </div>
+                    </div>
             </div>
 
-            <div style={{ width: "100%", textAlign: "center", backgroundColor: "#959aad", color: "white", fontSize: "20px", fontWeight: "600", marginBottom: "10px", maxWidth: "800px" }} >
+                <div style={{ margin: "0 0px 0 0px" }}>
+
+                    <div className="header-panel" >
                 Технические характеристики
             </div>
 
-            <div style={{ maxWidth: "800px" }}>
+                    <div>
                 <DataGrid
                     dataSource={this.state.desc}
                     showBorders={true}
@@ -194,7 +221,8 @@ class ProductDesc extends Component {
                     <Column dataField="value" alignment="left" />
                 </DataGrid>
             </div>
-
+                </div>
+            </div>
         </div>
     }
 }

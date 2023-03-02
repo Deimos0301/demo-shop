@@ -1,0 +1,45 @@
+.signup_row {
+    margin-top: 20px;
+}
+
+.signup_label {
+    font-size: 16px;
+    max-width: 110px;
+    min-width: 110px;
+    align-content: center;
+    font-weight: 400;
+}
+
+.signup_item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+.signup_btn {
+    margin-top: 30px; 
+}
+.react-tel-input {
+    width: 209px;
+}
+.react-tel-input .form-control {
+    width: 209px;
+}
+
+.form-auth {
+    align-self: center;
+    margin-top: 25px;
+}
+.form-popup-btn {
+    align-self: right;
+}
+
+@media (max-width: 1100px) {
+    .form-auth {
+        align-self: center;
+        max-width: 350px;
+    }
+}

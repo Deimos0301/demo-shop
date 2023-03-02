@@ -1,30 +1,61 @@
-import { React, Component } from 'react';
+import React, { Component } from 'react';
 import TabPanel, { Item } from 'devextreme-react/tab-panel';
-import { Popup, ToolbarItem } from 'devextreme-react/popup';
-import { Toast } from 'devextreme-react/toast';
+import { Popup } from 'devextreme-react/popup';
 import { Button } from 'devextreme-react/button';
 import { Link } from 'react-router-dom';
-import TextBox from 'devextreme-react/text-box';
+import notify from 'devextreme/ui/notify';
 import store from '../stores/ShopStore';
 import { observer } from 'mobx-react';
-//import {makeObservable} from 'mobx';
+import ChangePassword from './changePassword';
+
+import { Form, GroupItem, RequiredRule, PatternRule, EmailRule, SimpleItem, Label, ButtonItem } from 'devextreme-react/form';
 
 import './Style/profile.css';
+
+const loginData = {
+    login: "",
+    password: ""
+}
+
 
 @observer
 class Profile extends Component {
     constructor(props) {
         super(props);
 
+
+        this.buOK = React.createRef();
+        this.changePasswordForm = React.createRef();
+
         this.state = {
             authenticated: false,
             formVisible: false,
-            errorVisible: false,
+            changePasswordVisible: false,
+            oldPassword: "",
+            newPassword1: "",
+            newPassword2: "",
             password: ""
         }
     }
+    twoButtonsRender = () => {
+        return (
+            <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                <div>
+                    <Button text="Сохранить" type="success" width="178px" icon="save" stylingMode="containded" validationGroup='tratata' useSubmitBehavior={true} />
+                </div>
+
+                <div style={{ width: "100px", flexGrow: "6" }}></div>
+
+                <div>
+                    <Button text="Изменить пароль" width="178px" type="success" icon="key" stylingMode="containded" onClick={this.onChangePasswordClick} />
+                </div>
+            </div>
+        )
+    }
 
     componentDidMount = async () => {
+        //this.buOK.current.instance.registerKeyHandler('return', () => {this.onLoginClick()});
+
         //localStorage.removeItem('token');
         const token = localStorage.getItem('token');
 
@@ -38,27 +69,28 @@ class Profile extends Component {
                 //console.log(info)
             }
         }
-        else
+        else {
+            this.setState({ authenticated: false });
             this.showLoginForm();
-
+        }
     }
 
     showLoginForm = () => {
-        this.setState( {formVisible: true} );
+        this.setState({ formVisible: true }, () => { this.buOK.current.instance.registerKeyHandler('enter', () => { this.onLoginClick() }); });
     }
 
     hideLoginForm = () => {
-        this.setState( {formVisible: false} );
+        this.setState({ formVisible: false });
     }
 
     getAuth = async () => {
-        const { login } = store.userInfo;
+        const { login, password } = loginData;
         const res = await fetch('/api/getAuth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ user_id: null, login: login, password: this.state.password })
+            body: JSON.stringify({ user_id: null, login: login, password: password })
         });
         return await res.json();
     }
@@ -71,6 +103,10 @@ class Profile extends Component {
             },
             body: JSON.stringify({ token: token })
         });
+
+        if (res.status !== 200)
+            this.onLogout();
+        //this.setState({ authenticated: false, formVisible: true });
 
         return await res.json();
     }
@@ -86,6 +122,8 @@ class Profile extends Component {
     }
 
     onLoginClick = async (e) => {
+        e.preventDefault();
+
         const res = await this.getAuth();
 
         if (res.token) {
@@ -95,57 +133,41 @@ class Profile extends Component {
 
             await store.getUserInfoByToken();
 
-            this.setState({ authenticated: true, errorVisible: false, formVisible: false });
+            this.setState({ authenticated: true, formVisible: false });
         } else {
-            this.setState({ authenticated: false, errorVisible: true });
+            notify({
+                message: 'Пользователь или пароль указаны неверно!',
+                position: {
+                    my: 'center top',
+                    at: 'center center',
+                },
+            }, 'error', 3000)
+            this.setState({ authenticated: false });
         }
-    }
-
-    onHiding = () => {
-        this.setState({ errorVisible: false });
     }
 
     onLoginChanged = (data) => {
         store.userInfo.login = data.value;
     }
 
-    onFirstNameChanged = (data) => {
-        store.userInfo.first_name = data.value;
-    }
-
-    onLastNameChanged = (data) => {
-        store.userInfo.last_name = data.value;
-    }
-
-    onMiddleNameChanged = (data) => {
-        store.userInfo.middle_name = data.value;
-    }
-
-    onEmailChanged = (data) => {
-        store.userInfo.email = data.value;
-    }
-
-    onPhoneChanged = (data) => {
-        store.userInfo.phone = data.value;
-    }
-
-    onCityChanged = (data) => {
-        store.userInfo.city = data.value;
-    }
-
-    onAddressChanged = (data) => {
-        store.userInfo.address = data.value;
-    }
-
     onPasswordChanged = (data) => {
         this.setState({ password: data.value });
     }
 
-    onSaveProfile = async (e) => {
+    handleSubmit = async (e) => {
         await this.usersUpdate();
+        notify({
+            message: 'Изменения сохранены',
+            position: {
+                my: 'center top',
+                at: 'center top',
+            },
+        }, 'success', 3000);
+
+        e.preventDefault();
     }
 
-    onExit = (e) => {
+    onLogout = (e) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user_id');
 
@@ -160,6 +182,15 @@ class Profile extends Component {
         this.setState({ authenticated: false, formVisible: true });
     }
 
+    onChangePasswordClick = (e) => {
+        this.changePasswordForm.current.clearState();
+        this.setState({ changePasswordVisible: !this.state.changePasswordVisible });
+    }
+
+    hideChangePassword = () => {
+        this.setState({ changePasswordVisible: false });
+    }
+
     titleRenderer = (data) => {
         return <div style={{ fontSize: "18px", fontWeight: "500" }}>Авторизация</div>;
     }
@@ -167,15 +198,21 @@ class Profile extends Component {
     render() {
         return (
             <>
-                <Toast
-                    visible={this.state.errorVisible}
-                    message="Пользователь или пароль указаны неверно!"
-                    type="error"
-                    onHiding={this.onHiding}
-                    displayTime={800}
-                />
+                <div className='header-panel'>
+                    Личный кабинет
+                    <Button text="Выход" type="danger" icon="arrowright" stylingMode="contained" onClick={this.onLogout}></Button>
+                </div>
+
+
+                <ChangePassword
+                    ref={this.changePasswordForm}
+                    changePasswordVisible={this.state.changePasswordVisible}
+                    hideChangePassword={this.hideChangePassword}
+                >
+                </ChangePassword>
 
                 <Popup
+                    ref={this.buOK}
                     visible={this.state.formVisible}
                     onHiding={this.hideLoginForm}
                     dragEnabled={true}
@@ -186,26 +223,52 @@ class Profile extends Component {
                     container=".App"
                     titleRender={this.titleRenderer}
                     width={380}
-                    height={300}
+                    height={320}
                 >
-                    <ToolbarItem
-                        widget="dxButton"
-                        toolbar="bottom"
-                        location="after"
-                        options={{ text: "Вход", icon: "check", onClick: this.onLoginClick }}
-                    />
-                    {/* <ToolbarItem
-                        widget="dxButton"
-                        toolbar="bottom"
-                        location="before"
-                        options={{ text: 'Отмена', icon: "clear", onClick: this.hideLoginForm }}>
-                        <Link to="/signup"></Link>
-                    </ToolbarItem> */}
+                    <form onSubmit={this.onLoginClick}>
+                        <Form
+                            formData={loginData}
+                            labelLocation="top"
+                            validationGroup="loginData"
+                            onEditorEnterKey={() => {this.onLoginClick()}}
+                        >
+                            <SimpleItem dataField="login" editorType="dxTextBox" editorOptions={{ placeholder: "Логин/Телефон/Email" }} >
+                                <RequiredRule message="Логин обязателен для ввода" />
+                                <Label text="Пользователь" />
+                            </SimpleItem>
 
-                    <div className='profile_row'>
+                            <SimpleItem dataField="password" editorType="dxTextBox" editorOptions={{mode: "password", placeholder: "Пароль" }} >
+                                <RequiredRule message="Пароль обязателен для ввода" />
+                                <Label text="Пароль" />
+                            </SimpleItem>
+
+                            <GroupItem render={() =>
+                                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", fontSize: "17px"}}>
+                                    <div> <Link to="/signup" onClick={() => { this.hideLoginForm() }}> Регистрация  </Link> </div>
+                                </div>
+                            }>
+                            </GroupItem>
+
+                            <GroupItem render={() =>
+                                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", fontSize: "17px" }}>
+                                    <div> <Link to="/" onClick={() => { this.hideLoginForm() }}> На главную  </Link> </div>
+                                </div>
+                            }>
+                            </GroupItem>
+
+
+                            <ButtonItem 
+                                horizontalAlignment="right" 
+                                buttonOptions={{ text: "Вход", type: "normal", icon: "check", width: "120px", useSubmitBehavior: "true"  }} 
+                                
+                                validationGroup="loginData">
+                            </ButtonItem>
+                        </Form>
+                    </form>
+                    {/* <div className='profile_row'>
                         <div className='profile_item'>
                             <div className='profile_label'>Пользователь:</div>
-                            <TextBox text={store.userInfo.login} className="profile_input" placeholder='Телефон или email' onValueChanged={this.onLoginChanged}/>
+                            <TextBox text={store.userInfo.login} className="profile_input" placeholder='Телефон или email' onValueChanged={this.onLoginChanged} />
                         </div>
                         <div className='profile_item'>
                             <div className='profile_label'>Пароль:</div>
@@ -220,27 +283,9 @@ class Profile extends Component {
                     <div className="dx-field" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                         <div> <Link to="/" onClick={() => { this.hideLoginForm() }}> На главную  </Link> </div>
                     </div>
-                </Popup>
 
-                <div style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    paddingLeft: "10px",
-                    width: "100%",
-                    height: "40px",
-                    textAlign: "center",
-                    backgroundColor: "#959aad",
-                    color: "white",
-                    fontSize: "20px",
-                    fontWeight: "600",
-                    marginBottom: "10px"
-                }}
-                >
-                    Личный кабинет
-                    <Button text="Выход" type="danger" icon="arrowright" stylingMode="contained" onClick={this.onExit}></Button>
-                </div>
+                    <div style={{ display: "flex", justifyContent: "flex-end" }}><Button text="Вход" width="120px" type="normal" icon="check" stylingMode="outlined" onClick={this.onLoginClick} /></div> */}
+                </Popup>
 
                 <div>
                     {this.state.authenticated ?
@@ -249,59 +294,84 @@ class Profile extends Component {
                             selectedIndex={0}
                             loop={false}
                             animationEnabled={true}
-                            swipeEnabled={true}
+                            swipeEnabled={false}
                         >
                             <Item title="Личные данные">
-                                <div className='profile_wrap'>
-                                    <div className='profile_row'>
-                                        <div className='profile_item'>
-                                            <div className='profile_label'>Логин:</div>
-                                            <TextBox text={store.userInfo.login} className="profile_input" onValueChanged={this.onLoginChanged} />
-                                        </div>
+                                <div style={{ width: "600px", maxWidth: "97%", marginTop: "10px", marginLeft: "10px", paddingRight: "10px", marginBottom: "50px" }}>
 
-                                        <div className='profile_item'>
-                                            <div className='profile_label'>Фамилия:</div>
-                                            <TextBox text={store.userInfo.last_name} className="profile_input" onValueChanged={this.onLastNameChanged}/>
-                                        </div>
+                                    <form onSubmit={this.handleSubmit}>
+                                        <Form
+                                            action="our-action"
+                                            readOnly={false}
+                                            validationGroup='tratata'
+                                            formData={store.userInfo}
+                                            width="100%"
+                                            colCount={1}
+                                            showColonAfterLabel={true}
+                                            showValidationSummary={true}
+                                        >
+                                            <GroupItem caption="Основные" itemType="group">
+                                                <SimpleItem dataField="login" editorType="dxTextBox">
+                                                    <RequiredRule message="Логин обязателен для ввода" />
+                                                    <Label text="Логин" />
+                                                </SimpleItem>
 
-                                        <div className='profile_item'>
-                                            <div className='profile_label'>Имя:</div>
-                                            <TextBox text={store.userInfo.first_name} className="profile_input" onValueChanged={this.onFirstNameChanged}/>
-                                        </div>
+                                                <SimpleItem dataField="last_name" editorType="dxTextBox">
+                                                    <RequiredRule message="Фамилия обязательна для ввода" />
+                                                    <Label text="Фамилия" />
+                                                </SimpleItem>
 
-                                        <div className='profile_item'>
-                                            <div className='profile_label'>Отчество:</div>
-                                            <TextBox value={store.userInfo.middle_name} className="profile_input" onValueChanged={this.onMiddleNameChanged}/>
-                                        </div>
+                                                <SimpleItem dataField="first_name" editorType="dxTextBox">
+                                                    <RequiredRule message="Имя обязательно для ввода" />
+                                                    <Label text="Имя" />
+                                                </SimpleItem>
 
-                                        <div className='profile_item'>
-                                            <div className='profile_label'>Email:</div>
-                                            <TextBox text={store.userInfo.email} mode="email" className="profile_input" onValueChanged={this.onEmailChanged} />
-                                        </div>
+                                                <SimpleItem dataField="middle_name" editorType="dxTextBox">
+                                                    <Label text="Отчество" />
+                                                </SimpleItem>
 
-                                        <div className='profile_item'>
-                                            <div className='profile_label'>Телефон:</div>
-                                            <TextBox text={store.userInfo.phone} className="profile_input" mode="tel" onValueChanged={this.onPhoneChanged} />
-                                        </div>
+                                            </GroupItem>
 
-                                        <div className='profile_item'>
-                                            <div className='profile_label'>Город:</div>
-                                            <TextBox text={store.userInfo.city} className="profile_input" onValueChanged={this.onCityChanged} />
-                                        </div>
+                                            <GroupItem caption="Дополнительно">
+                                                <SimpleItem dataField="email" editorType="dxTextBox">
+                                                    <RequiredRule message="Email обязателен для ввода" />
+                                                    <EmailRule message="Некорректный email-адрес" />
+                                                    <Label text="Email" />
+                                                </SimpleItem>
 
-                                        <div className='profile_item'>
-                                            <div className='profile_label'>Адрес:</div>
-                                            <TextBox text={store.userInfo.address} className="profile_input" onValueChanged={this.onAddressChanged} />
-                                        </div>
+                                                <SimpleItem dataField="phone" editorType="dxTextBox" editorOptions={{
+                                                    mask: '+7 (X00) 000-0000',
+                                                    maskRules: {
+                                                        X: /[02-9]/,
+                                                    },
+                                                    maskInvalidMessage: 'Телефон должен содержать корректный российский номер'
+                                                }}>
+                                                    <RequiredRule message="Телефон обязателен для ввода" />
+                                                    <PatternRule
+                                                        message="Номер телефон указан неверно!"
+                                                        pattern={/^[02-9]\d{9}$/}
+                                                    />
+                                                    <Label text="Телефон" />
+                                                </SimpleItem>
 
-                                        <div className='profile_item' style={{ marginTop: "20px", marginLeft: "10px" }}>
-                                            <Button text="Сохранить" type="success" icon="save" stylingMode="containded" onClick={this.onSaveProfile} />
-                                        </div>
-                                    </div>
+                                                <SimpleItem dataField="city" editorType="dxTextBox">
+                                                    <Label text="Город" />
+                                                </SimpleItem>
+
+                                                <SimpleItem dataField="address" editorType="dxTextBox">
+                                                    <Label text="Адрес" />
+                                                </SimpleItem>
+
+                                            </GroupItem>
+
+                                            <GroupItem render={this.twoButtonsRender} />
+                                        </Form>
+                                    </form>
                                 </div>
                             </Item>
 
-                            <Item title="Мои заказы"></Item>
+                            <Item title="Категории"></Item>
+                            <Item title="Пользователи"></Item>
                         </TabPanel>
                         :
                         <div></div>}

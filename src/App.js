@@ -1,10 +1,11 @@
-import Login from './components/login';
 import Catalog from './components/catalog';
 import Signup from './components/signup';
 import Profile from './components/profile';
 import { React, Component } from 'react';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from './header';
+import About from './components/about';
+import News from './components/news';
 import './App.css';
 import CartComp from './components/cartComp';
 import ProductDesc from './components/productDesc';
@@ -22,7 +23,6 @@ class App extends Component {
             login: '',
             password: '',
             authenticated: false,
-            // currentNode: "",
             gridRow: {}
         }
     }
@@ -60,10 +60,11 @@ class App extends Component {
 
         if (!rowData) return;
 
-        //console.log(e.component.option('focusedRowKey'));
         let data = [];
 
         if (rowData.brand_id !== null) {
+            store.setSideBarIsOpen(false);
+//            console.log(store.sideBarIsOpen)
             data = await this.getProducts(rowData.category_id, rowData.brand_id);
             store.setGridSource(data);
             store.setCurrentNode(rowData.node_name);
@@ -71,7 +72,6 @@ class App extends Component {
 
         
         this.setState({
-            // currentNode: rowData.node_name,
             category_id: rowData.category_id,
             brand_id: rowData.brand_id
         });
@@ -88,18 +88,14 @@ class App extends Component {
                     <Header onFocusedRowChanged={this.onFocusedRowChanged} />
 
                     <Routes>
-                        <Route exact path='/' element={
-                            <Catalog
-                                onFocusedRowChanged={this.onFocusedRowChanged}
-                                onGridFocusedRowChanged={this.onGridFocusedRowChanged}
-                                currentNode={store.currentNode}
-                            />}
-                        />
-                        <Route exact path='/auth' element={<Login onSubmitClick={this.onSubmitClick} />}></Route>
+                        <Route exact path='/' element={<News />} />
+                        {/* <Route exact path='/auth' element={<Login onSubmitClick={this.onSubmitClick} />}></Route> */}
                         <Route exact path='/signup' element={<Signup />}></Route>
                         <Route exact path='/profile' element={<Profile />}></Route>
                         <Route exact path='/basket' element={<CartComp  />}></Route>
-                        <Route path='/product' element={<ProductDesc /*rowData={this.state.rowData}*/ />} />
+                        <Route path='/product' element={<ProductDesc />} />
+                        <Route exact path='/catalog' element={<Catalog onFocusedRowChanged={this.onFocusedRowChanged} onGridFocusedRowChanged={this.onGridFocusedRowChanged} />}></Route>
+                        <Route exact path='/about' element={<About />} />
                     </Routes>
                 </div>
             </BrowserRouter>

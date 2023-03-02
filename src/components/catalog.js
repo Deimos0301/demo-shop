@@ -31,7 +31,6 @@ class Catalog extends Component {
 
                 <Products
                         dataSource={this.props.gridData}
-                        currentNode={this.props.currentNode}
                         onGridFocusedRowChanged={this.props.onGridFocusedRowChanged}
                 />
             </div>

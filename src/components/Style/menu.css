@@ -1,0 +1,33 @@
+.header-menu__item {
+    color: #476070;
+    font-weight: bold;
+    padding: 0 20px 0 20px;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.header-menu__item:hover {
+    color: blueviolet;
+}
+
+@media (min-width: 1120px) {
+    .header-menu {
+        display: flex;
+        margin-left: 30px;
+        flex-direction: row;
+        list-style-type: none;
+        align-items: center;
+        color: white;
+        z-index: 2;
+    }    
+
+    .sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 1119px) {
+    .header-menu {
+        display: none;
+    }
+}
