@@ -178,7 +178,7 @@ export default class NewsEditor extends Component {
                         <div style={{ marginLeft: "5px" }}> <Button icon="save" type="default" text="Сохранить" stylingMode="outlined" onClick={this.onSaveClick} disabled={this.state.news_id === 0}> </Button> </div>
                         <div style={{ flexGrow: "1" }} />
                         <div> <Button icon="plus" id="add" type="success" stylingMode="outlined" onClick={this.onAddClick} disabled={this.state.news_id < 0} /> </div>
-                        <div> <Button icon="clear" id="cancel" type="danger" stylingMode="outlined" onClick={this.onCanelClick} disabled={this.state.news_id >= 0} /> </div>
+                        <div> <Button icon="close" id="cancel" type="danger" stylingMode="outlined" onClick={this.onCanelClick} disabled={this.state.news_id >= 0} /> </div>
                         {/* <div> <Button icon="minus" onClick={this.onDelClick} /> </div> */}
                     </div>
 
