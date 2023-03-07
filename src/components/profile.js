@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import notify from 'devextreme/ui/notify';
 import store from '../stores/ShopStore';
 import { observer } from 'mobx-react';
+import NewsEditor from './newsEditor';
 import ChangePassword from './changePassword';
 
 import { Form, GroupItem, RequiredRule, PatternRule, EmailRule, SimpleItem, Label, ButtonItem } from 'devextreme-react/form';
@@ -371,7 +372,7 @@ class Profile extends Component {
                             </Item>
 
                             <Item title="Категории"></Item>
-                            <Item title="Пользователи"></Item>
+                            {store.userInfo.isadmin ?  <Item title="Новости" > <NewsEditor /> </Item> : <div />}
                         </TabPanel>
                         :
                         <div></div>}

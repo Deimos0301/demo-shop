@@ -147,7 +147,9 @@ class CartComp extends Component {
     cartItem = (e) => {
         const href = `/product?product_id=${e.product_id}`;
 
-        return <div className='cart-list'>
+        return (
+            <div className='cart-list'>
+
             <Link to={href}> <div className='cart_image' style={{backgroundImage: `url(${e.product_image_short})`}}>  </div> </Link>
             
 
@@ -178,6 +180,7 @@ class CartComp extends Component {
                 </div>
             </div>
         </div>
+        );
     }
 
 

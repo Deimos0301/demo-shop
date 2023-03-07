@@ -9,11 +9,17 @@ const nodemailer = require('nodemailer');
 //const crypto = require('crypto');
 const fs = require('fs');
 const url = require('url');
-const util = require('util');
+var bodyParser = require('body-parser');
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({limit: '5mb'}));
+app.use(bodyParser.urlencoded({
+    limit: '5mb',
+    extended: true,
+    parameterLimit:50000
+  }));
+
 app.use((req, res, next) => {
     if (req.headers.authorization) {
         jwt.verify(
@@ -217,7 +223,6 @@ app.post('/api/getCategories2', urlencodedParser, async (req, res) => {
         from "getCategories"(${!req.body.withBrands || req.body.withBrands === 'true' ? true : false})`);
 
     const pa = pack(rows.rows);
-    //console.log(pa[0].items[0]);
 
     res.json(pa);
 });
@@ -226,7 +231,31 @@ app.post('/api/getProducts', urlencodedParser, async (req, res) => {
     //console.log(req.body);
     const rows = await pool.query('select * from "getProducts"($1, $2, $3)', [req.body.category_id, req.body.brand_id, req.body.product_id]);
     res.json(rows.rows);
-    //res.end('done');
+});
+
+app.post('/api/getProductHits', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select * from "getProductHits"()', []);
+    res.json(rows.rows);
+});
+
+app.post('/api/getNews', urlencodedParser, async (req, res) => {
+    const rows = await pool.query('select * from "getNews"()', []);
+    res.json(rows.rows);
+});
+
+app.post('/api/newsUpdate', urlencodedParser, async (req, res) => {
+    await pool.query('call "newsUpdate"($1, $2, $3, $4)', [req.body.news_id, req.body.news_short, req.body.news_text, req.body.news_date]);
+    res.end('done');
+});
+
+app.post('/api/newsInsert', urlencodedParser, async (req, res) => {
+    await pool.query('call "newsInsert"($1, $2, $3)', [req.body.news_short, req.body.news_text, req.body.news_date]);
+    res.end('done');
+});
+
+app.post('/api/newsDelete', urlencodedParser, async (req, res) => {
+    await pool.query('delete from news where news_id = $1', [req.body.news_id]);
+    res.end('done');
 });
 
 app.post('/api/getProductDesc2', urlencodedParser, async (req, res) => {

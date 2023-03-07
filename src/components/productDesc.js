@@ -134,19 +134,20 @@ class ProductDesc extends Component {
 
                     <div className="wrap_photo" style={{ display: "flex" }}>
                         {/* <div className="prod_photo" style={{ backgroundImage: `url(${image_prefix + product_image_main})` }} /> */}
-                        <div className="prod_photo"> 
-                            <Gallery 
+                        <div className="prod_photo">
+                            <Gallery
                                 dataSource={images}
+                                loop={true}
                                 showNavButtons={true}
                             >
                             </Gallery> </div>
-                </div>
+                    </div>
 
                     <div className="prod-desc">
                         <div className="product_full_name" >{product_full_name}</div>
 
                         <div style={{ display: "flex", flexDirection: "column", flexGrow: "3" }}>
-                            <table style={{maxWidth: "400px"}}>
+                            <table style={{ maxWidth: "400px" }}>
                                 <tr>
                                     <td className="desc_head"> Бренд: </td>
                                     <td className="desc_value"> {brand_name} </td>
@@ -179,48 +180,48 @@ class ProductDesc extends Component {
                                 <div className="price" style={{ fontSize: "20px", fontWeight: 500, flexGrow: 1 }}>Цена: {product_price_retail_rub ? formatter.format(product_price_retail_rub.toFixed(0)) : 0}</div>
 
                                 <div style={{ display: "flex", marginLeft: "5px", justifyContent: "center", alignItems: "center" }}>
-                    <div><Button icon="minus" onClick={this.onMinusClick} disabled={this.state.minusDisabled} /></div>
+                                    <div><Button icon="minus" onClick={this.onMinusClick} disabled={this.state.minusDisabled} /></div>
 
-                    <NumberBox
-                        width="50px"
-                        defaultValue={1}
-                        value={this.state.quantity}
-                        min={1}
-                        showSpinButtons={false}
-                    />
+                                    <NumberBox
+                                        width="50px"
+                                        defaultValue={1}
+                                        value={this.state.quantity}
+                                        min={1}
+                                        showSpinButtons={false}
+                                    />
 
-                    <div><Button icon="plus" onClick={this.onPlusClick} /></div>
-                </div>
+                                    <div><Button icon="plus" onClick={this.onPlusClick} /></div>
+                                </div>
 
                                 <div style={{ display: "flex", marginLeft: "5px", marginRight: "0px" }}>
                                     <Button text="В корзину" type="success" icon="arrowright" stylingMode="contained" onClick={this.basketInsert} />
-                </div>
-            </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-            </div>
+                </div>
 
                 <div style={{ margin: "0 0px 0 0px" }}>
 
                     <div className="header-panel" >
-                Технические характеристики
-            </div>
+                        Технические характеристики
+                    </div>
 
                     <div>
-                <DataGrid
-                    dataSource={this.state.desc}
-                    showBorders={true}
-                    keyExpr="attribute_id"
-                    showColumnHeaders={false}
-                    wordWrapEnabled={true}
-                >
-                    <Grouping autoExpandAll={true} />
-                    <Paging pageSize={100} />
-                    <Column dataField="group_name" groupIndex={0} groupCellRender={this.renderGroup} />
-                    <Column dataField="attr_name" alignment="left" />
-                    <Column dataField="value" alignment="left" />
-                </DataGrid>
-            </div>
+                        <DataGrid
+                            dataSource={this.state.desc}
+                            showBorders={true}
+                            keyExpr="attribute_id"
+                            showColumnHeaders={false}
+                            wordWrapEnabled={true}
+                        >
+                            <Grouping autoExpandAll={true} />
+                            <Paging pageSize={100} />
+                            <Column dataField="group_name" groupIndex={0} groupCellRender={this.renderGroup} />
+                            <Column dataField="attr_name" alignment="left" />
+                            <Column dataField="value" alignment="left" />
+                        </DataGrid>
+                    </div>
                 </div>
             </div>
         </div>

@@ -9,6 +9,7 @@ import News from './components/news';
 import './App.css';
 import CartComp from './components/cartComp';
 import ProductDesc from './components/productDesc';
+import NewsDesc from './components/newsDesc';
 import { observer } from 'mobx-react';
 import store from './stores/ShopStore';
 
@@ -94,6 +95,7 @@ class App extends Component {
                         <Route exact path='/profile' element={<Profile />}></Route>
                         <Route exact path='/basket' element={<CartComp  />}></Route>
                         <Route path='/product' element={<ProductDesc />} />
+                        <Route path='/news' element={<NewsDesc />} />
                         <Route exact path='/catalog' element={<Catalog onFocusedRowChanged={this.onFocusedRowChanged} onGridFocusedRowChanged={this.onGridFocusedRowChanged} />}></Route>
                         <Route exact path='/about' element={<About />} />
                     </Routes>

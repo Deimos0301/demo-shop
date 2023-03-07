@@ -5,6 +5,7 @@
     font-weight: 700;
     width: 100%;
     word-wrap: break-word;
+    word-break: break-word;
 }
 
 .desc_row {

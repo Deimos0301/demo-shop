@@ -9,6 +9,8 @@ class Store {
 
     @observable treeSource = [];
 
+    @observable newsData = [];
+
     @observable currentNode = '';
 
     @observable userInfo = {};
@@ -35,6 +37,10 @@ class Store {
     };
 
     @observable basketData = [];
+
+    @action setNewsData = (data) => {
+        this.newsData = [...data];
+    }
 
     @action setTreeSource = (data) => {
         this.treeSource = [...data];
@@ -116,6 +122,21 @@ class Store {
             body: JSON.stringify({ user_id: this.userInfo.user_id })
         });
         return await arr.json();
+    }
+
+    getNewsData = async () => {
+        const arr = await fetch('/api/getNews', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ })
+        });
+        const res = await arr.json();
+
+        this.setNewsData(res);
+
+        return res;
     }
 }
 
