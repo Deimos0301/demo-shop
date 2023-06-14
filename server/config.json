@@ -7,8 +7,8 @@
     "pg": {
         "host": "s48.mxhome.ru",
         "database":"3logic",
-        "user":"sa",
-        "password":"sa2008_s48",
+        "user":"web",
+        "password":"web",
         "port": 5432
     }
 }

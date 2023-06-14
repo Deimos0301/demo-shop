@@ -7,6 +7,7 @@ import DateBox from 'devextreme-react/date-box';
 import { observer } from 'mobx-react';
 import ruMessages from "devextreme/localization/messages/ru.json";
 import { locale, loadMessages } from "devextreme/localization";
+import { confirm } from 'devextreme/ui/dialog';
 import HtmlEditor, {Toolbar, MediaResizing, Item} from 'devextreme-react/html-editor';
 import config from "devextreme/core/config";
 import store from "../stores/ShopStore";
@@ -78,8 +79,10 @@ export default class NewsEditor extends Component {
     }
 
     onDelClick = async (e) => {
-        if (e.component._props.news_id > 0)
-            if (!window.confirm("Удалить запись?")) return;
+        if (e.component._props.news_id > 0) {
+            const res = await confirm("Удалить запись?", "Подтверждение");
+            if (!res) return;
+        }
 
         if (e.component._props.news_id === -1) {
             const arr = [...store.newsData];

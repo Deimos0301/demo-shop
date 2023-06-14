@@ -79,64 +79,66 @@ class Store {
 
     getUserInfoByToken = async () => {
         const token = localStorage.getItem('token');
-        if (token) {
-            const arr = await fetch('/api/getUserInfoByToken', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ token: token })
-            });
+        if (!token) return undefined;
 
-            const res = await arr.json();
-
-            this.setUserInfo(res[0]);
-
-            return res[0];
-        }
-
-        return undefined;
+        const res = await this.fetchPost('/api/getUserInfoByToken', { token: token });
+        this.setUserInfo(res[0]);
+        return res[0];
     }
 
     getUserInfo = async (user_id) => {
-        const res = await fetch('/api/getUserInfo', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ user_id: user_id })
-        });
-        const li = await res.json();
+        const res = await this.fetchPost('/api/getUserInfo', { user_id: user_id });
 
-        this.setUserInfo(li[0]);
+        this.setUserInfo(res[0]);
 
-        return li[0];
+        return res[0];
     }
 
     getBasket = async () => {
-        const arr = await fetch('/api/getBasket', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ user_id: this.userInfo.user_id })
-        });
-        return await arr.json();
+        const res = await this.fetchPost('/api/getBasket', { user_id: this.userInfo.user_id });
+        return res;
     }
 
     getNewsData = async () => {
-        const arr = await fetch('/api/getNews', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ })
-        });
-        const res = await arr.json();
+        const res = await this.fetchPost('/api/getNews');
 
         this.setNewsData(res);
 
         return res;
+    }
+
+    fetchPost = async (url, params) => {
+        const arr = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(params || {})
+        });
+
+        const res = await arr.json();
+
+        return res;
+    }
+
+    fetchPut = async (url, params) => {
+        const arr = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(params || {})
+        });
+    }
+
+    fetchDelete = async (url, params) => {
+        const arr = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(params || {})
+        });
     }
 }
 

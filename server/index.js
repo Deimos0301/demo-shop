@@ -9,16 +9,17 @@ const nodemailer = require('nodemailer');
 //const crypto = require('crypto');
 const fs = require('fs');
 const url = require('url');
+// const Sequelize = require('sequelize');
 var bodyParser = require('body-parser');
 
 const app = express();
 
-app.use(express.json({limit: '5mb'}));
+app.use(express.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({
     limit: '5mb',
     extended: true,
-    parameterLimit:50000
-  }));
+    parameterLimit: 50000
+}));
 
 app.use((req, res, next) => {
     if (req.headers.authorization) {
@@ -88,10 +89,10 @@ app.post('/api/verifyToken', urlencodedParser, async (req, res) => {
 });
 
 app.post('/api/getAuth', urlencodedParser, async (req, res) => {
-    const r = await pool.query('select "getTokenByLogin"($1)', [req.body.login]);
+    const r = await pool.query('select "getTokenByLogin"($1) as token', [req.body.login]);
     let token;
     if (r.rows)
-        token = r.rows[0].getTokenByLogin;
+        token = r.rows[0].token;
 
     const rows = await pool.query('select * from "getUserInfo"($1, $2, $3) where IsActive = true', [req.body.user_id, req.body.login, req.body.password]);
     if (rows.rows && rows.rows.length > 0) {
@@ -159,10 +160,10 @@ app.post('/api/usersInsert', urlencodedParser, async (req, res, next) => {
         await pool.query('call "tokenInsert"($1, $2, $3)', [token, rows.rows[0].user_id, D.addHours(12)]);
         await sendMail(email, "Для подтверждения регистрации перейдите по следующей ссылке:<br/> " + origin + token);
 
-        res.status(200).send({message: "На указанный Email выслано сообщение о подтверждении регистрации"});
+        res.status(200).send({ message: "На указанный Email выслано сообщение о подтверждении регистрации" });
     }
     catch (e) {
-        res.status(531).send({message: e.message});        
+        res.status(531).send({ message: e.message });
     }
 });
 
@@ -170,7 +171,7 @@ app.get('/api/confirm*', urlencodedParser, async (req, res) => {
     const token = req.query.token;
     await pool.query('update users set IsActive = true where User_ID = (select User_ID from Token t where t.token = $1)', [token]);
     const rows = await pool.query('select * from "getUserInfoByToken"($1) where IsActive = true', [token]);
-    res.status(200).send( rows.rows.length > 0 ? 'Учетная запись подтверждена!' : 'Ошибка при подтверждении!');
+    res.status(200).send(rows.rows.length > 0 ? 'Учетная запись подтверждена!' : 'Ошибка при подтверждении!');
 });
 
 app.post('/api/userChangePassword', urlencodedParser, async (req, res) => {
@@ -192,14 +193,13 @@ app.all('/*', function (req, res, next) {
 });
 
 app.post('/api/getCategories', urlencodedParser, async (req, res) => {
-    const rows = await pool.query(`select * from "getCategories"(${!req.body.withBrands || req.body.withBrands === 'true' ? true : false})`);
-    //await pool.query('select * from users');
+    const withBrands = !req.body.withBrands || req.body.withBrands === 'true';
+    const rows = await pool.query(`select * from "getCategories"($1)`, [withBrands]);
     res.json(rows.rows);
 });
 
 app.post('/api/getCategoriesJson', urlencodedParser, async (req, res) => {
     const rows = await pool.query(`select * from "getCategoriesJson"()`);
-    //await pool.query('select * from users');
     res.json(rows.rows);
 });
 
@@ -299,15 +299,13 @@ app.post('/api/basketInsert', urlencodedParser, async (req, res) => {
     res.end("done");
 });
 
-app.post('/api/basketDelete', urlencodedParser, async (req, res) => {
-    //console.log(host, req.body)
+app.delete('/api/basketDelete', async (req, res) => {
     await pool.query('call public."BasketDelete"($1)', [req.body.basket_id]);
 
     res.end("done");
 });
 
-
-app.post('/api/basketUpdate', urlencodedParser, async (req, res) => {
+app.put('/api/basketUpdate', urlencodedParser, async (req, res) => {
     //console.log(host, req.body)
     await pool.query('call public."BasketUpdate"($1, $2)', [req.body.basket_id, req.body.quantity]);
 
@@ -356,6 +354,7 @@ getBrands = (client) => {
         let brandArr = [];
 
         client.getBrandList(null, (err, result) => {
+
             result.return.item.map((item) => {
                 brandArr.push({ brand_id: item.brand_id.$value, brand_name: item.brand_name.$value ? item.brand_name.$value : '<Не определено>' })
             });
@@ -545,6 +544,7 @@ load3Logic = async (enabledCategories) => {
     const client = await soap.createClientAsync(urlLogic);
     client.setSecurity(new soap.BasicAuthSecurity(config.ltr.login, config.ltr.password));
     await getToday(client);
+
     await pool.query('begin');
 
     try {
@@ -662,3 +662,14 @@ app.listen(config.port);
 
 
 console.log(`App is listening on port ${config.port}`);
+
+// const sequelize = new Sequelize('3logic', 'web', 'web', {
+//     host: 's48-svn',
+//     dialect: 'postgres'
+// });
+
+// (async () => {
+//     await sequelize.authenticate();
+//     console.log('Соединение с БД было успешно установлено')
+// }
+// )();

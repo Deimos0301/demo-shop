@@ -148,30 +148,32 @@ class ProductDesc extends Component {
 
                         <div style={{ display: "flex", flexDirection: "column", flexGrow: "3" }}>
                             <table style={{ maxWidth: "400px" }}>
-                                <tr>
-                                    <td className="desc_head"> Бренд: </td>
-                                    <td className="desc_value"> {brand_name} </td>
-                                </tr>
-                                <tr>
-                                    <td className="desc_head"> Артикул: </td>
-                                    <td className="desc_value"> {product_articul} </td>
-                                </tr>
-                                <tr>
-                                    <td className="desc_head"> УИН: </td>
-                                    <td className="desc_value"> {product_partnumber} </td>
-                                </tr>
-                                <tr>
-                                    <td className="desc_head"> Категория: </td>
-                                    <td className="desc_value"> {category_name} </td>
-                                </tr>
-                                <tr>
-                                    <td className="desc_head"> Гарантия: </td>
-                                    <td className="desc_value"> {product_warranty} мес. </td>
-                                </tr>
-                                <tr>
-                                    <td className="desc_head"> Наличие на складе: </td>
-                                    <td className="desc_value"> {product_remain_text} </td>
-                                </tr>
+                                <tbody>
+                                    <tr>
+                                        <td className="desc_head"> Бренд: </td>
+                                        <td className="desc_value"> {brand_name} </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="desc_head"> Артикул: </td>
+                                        <td className="desc_value"> {product_articul} </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="desc_head"> УИН: </td>
+                                        <td className="desc_value"> {product_partnumber} </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="desc_head"> Категория: </td>
+                                        <td className="desc_value"> {category_name} </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="desc_head"> Гарантия: </td>
+                                        <td className="desc_value"> {product_warranty} мес. </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="desc_head"> Наличие на складе: </td>
+                                        <td className="desc_value"> {product_remain_text} </td>
+                                    </tr>
+                                </tbody>
                             </table>
 
                             <div style={{ flexGrow: "3" }}></div>

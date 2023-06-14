@@ -33,6 +33,8 @@ li {
 .prod__desc {
     text-align: left;
     width: 200px;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .prod__addInfo {

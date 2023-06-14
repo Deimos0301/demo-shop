@@ -9,6 +9,7 @@ import '../App.css';
 import { List } from 'devextreme-react';
 import store from '../stores/ShopStore';
 import { observer } from 'mobx-react';
+import { confirm } from 'devextreme/ui/dialog';
 import { runInAction } from 'mobx';
 
 
@@ -45,7 +46,8 @@ class CartComp extends Component {
     }
 
     deleteItem = async (e) => {
-        if (!window.confirm("Удалить товар из корзины?")) return;
+        const res = await confirm("Удалить товар из корзины?", "Подтверждение");
+        if (!res) return;
 
         // Делаем копию массива basketData
         let data = [...store.basketData];
@@ -121,23 +123,11 @@ class CartComp extends Component {
     }
 
     basketDelete = async (basket_id) => {
-        await fetch('/api/basketDelete', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ basket_id: basket_id })
-        });
+        store.fetchDelete('/api/basketDelete', { basket_id: basket_id });
     }
 
     basketUpdate = async (basket_id, quantity) => {
-        await fetch('/api/basketUpdate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ basket_id: basket_id, quantity: quantity })
-        });
+        await store.fetchPut('/api/basketUpdate', { basket_id: basket_id, quantity: quantity });
     }
 
     onQuantityChanged = (e) => {

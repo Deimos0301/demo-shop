@@ -123,7 +123,8 @@ class Profile extends Component {
     }
 
     onLoginClick = async (e) => {
-        e.preventDefault();
+        if (e)
+            e.preventDefault();
 
         const res = await this.getAuth();
 

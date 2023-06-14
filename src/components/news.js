@@ -45,6 +45,7 @@ export default class News extends Component {
                     <div className="header-panel">Новости</div>
 
                     <List
+                        key={store.newsData.news_id}
                         dataSource={store.newsData}
                         itemRender={this.newsItem}
                         repaintChangesOnly={true}>

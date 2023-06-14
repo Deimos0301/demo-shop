@@ -32,13 +32,13 @@ class Hits extends Component {
 
     componentDidMount = async () => {
         const hits = await this.getProductHits();
-        console.log(hits)
+        // console.log(hits)
         let divs = [];
 
         hits.map(hit => {
             const href = `/product?product_id=${hit.product_id}`;
             divs.push(
-                <Link to={href} style={{textDecoration: "none"}}>
+                <Link to={href} style={{textDecoration: "none"}} key={hit.product_id}>
                     <div className="hit-item" prodinfo={hit} key={hit.product_id} style={{color: 'black'}}>
                         <div className="prod_ph" style={{ backgroundImage: `url(${hit.image_prefix + hit.product_image_main})`, backgroundRepeat: 'no-repeat', backgroundSize: '100% 100%', marginTop: '10px', width: '130px', height: '130px' }} />
                         <div className="prod__desc">

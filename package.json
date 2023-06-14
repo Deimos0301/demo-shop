@@ -2,7 +2,7 @@
   "name": "demo-shop",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://78.107.239.68:5000/",
+  "proxy": "http://localhost:5000/",
   "dependencies": {
     "@babel/core": "^7.17.0",
     "@babel/eslint-parser": "^7.17.0",
